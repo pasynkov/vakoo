@@ -1,15 +1,24 @@
 {
-  "name": "Vakoo",
-  "description": "Vakoo — NodeJS based CMS",
+  "name": "vakoo",
   "version": "0.0.1",
-  "private": true,
-  "dependencies": {
-    "underscore": "~1.6.0",
-    "mongodb": "~1.3.23",
-    "susanin": "~0.1.10",
-    "express": "~3.5.1",
-    "handlebars": "~2.0.0-alpha.2",
-    "connect-multiparty": "~1.0.3",
-    "mime": "~1.2.11"
-  }
+  "description": "Vakoo Framework",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pasynkov/vakoo.git"
+  },
+  "keywords": [
+    "vakoo",
+    "framework",
+    "simple"
+  ],
+  "author": "Pasa",
+  "license": "GNU",
+  "bugs": {
+    "url": "https://github.com/pasynkov/vakoo/issues"
+  },
+  "homepage": "https://github.com/pasynkov/vakoo"
 }
