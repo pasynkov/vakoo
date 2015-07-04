@@ -2,6 +2,7 @@ program = require "commander"
 winston = require "winston"
 
 Creator = require "./manager/creator"
+Migrator = require "./manager/migrator"
 
 class VakooManager
 
@@ -15,13 +16,23 @@ class VakooManager
     .action =>
       @logger.info "Start watch directory ..."
 
-    program.command "create <type> <name>"
-    .action (type, name)=>
+    program.command "create <type> <name> <storage>"
+    .action (type, name, storage)=>
 
-      @logger.info "Run `create` action with type `#{type}` and name `#{name}`"
+      @logger.info "Run `create` action with type `#{type}` and name `#{name}`. Storage is `#{storage}`"
 
-      creator = new Creator type, name
+      creator = new Creator type, name, storage
       creator.create()
+
+    program.command "migrate <direction> <storage>"
+    .action (direction, storage)=>
+
+      @logger.info "Run migration `#{storage}`"
+
+      migrator = new Migrator direction, storage
+
+      migrator.run (err)=>
+        process.exit if err then 1 else 0
 
 
 

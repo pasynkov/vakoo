@@ -10,9 +10,12 @@ Handlebars = require "handlebars"
 
 class Creator
 
-  constructor: (@type, @name)->
+  constructor: (@type, @name, @storage)->
 
     @logger = manager.getLogger "VakooCreator"
+
+    if @storage not in ["mongo", "mysql"]
+      return @logger.error "Unkown storage `#{@storage}`"
 
     @static = new Static
 
@@ -38,7 +41,7 @@ class Creator
               return part[0].toUpperCase() + part[1...].toLocaleLowerCase()
           ).join ""
 
-          taskCallback null, template({name: className})
+          taskCallback null, template({name: className, storage: @storage})
 
         (content, taskCallback)=>
 

@@ -23,6 +23,7 @@
   "homepage": "https://github.com/pasynkov/vakoo",
   "dependencies": {
     "async": "^1.3.0",
+    "coffee-script": "^1.9.3",
     "commander": "^2.8.1",
     "express": "^4.13.0",
     "handlebars": "^3.0.3",

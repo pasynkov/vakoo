@@ -1,6 +1,7 @@
 fs = require "fs"
 async = require "async"
 mkdirp = require "mkdirp"
+Path = require "path"
 
 class Static
 
@@ -44,6 +45,35 @@ class Static
           return callback err
 
         fs.writeFile path, content, callback
+
+  readDir: (dir, callback)=>
+    fs.readdir dir, (err, files)=>
+      if err
+        callback err
+      else
+        returnFiles = []
+        async.each(
+          files
+          (file, eCallback)=>
+            filePath = Path.join(dir, file)
+            fs.stat filePath, (err, stat)=>
+              if err
+                eCallback err
+              else
+                if stat.isDirectory()
+                  @readDir filePath, (err, results)->
+                    if err
+                      eCallback err
+                    else
+                      returnFiles = returnFiles.concat results
+                      eCallback()
+                else if stat.isFile()
+                  returnFiles.push filePath
+                  eCallback()
+
+          (err)->
+            callback err, returnFiles
+        )
 
 
 
