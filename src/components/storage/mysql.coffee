@@ -11,8 +11,6 @@ class Mysql
 
     @config = _.defaults @config, vakoo.constants.DEFAULT_MYSQL_CONFIG
 
-    console.log @config
-
     @client = mysql.createConnection @config
 
 
