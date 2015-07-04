@@ -1,20 +1,27 @@
 program = require "commander"
+winston = require "winston"
 
-Creator = require "./manager/creator.coffee"
+Creator = require "./manager/creator"
 
 class VakooManager
 
   constructor: ->
 
-    program
-      .command "watch"
-      .action ->
-        console.log "hello"
+    @logger = @getLogger "VakooManager"
 
-      .command "create <type> <name>"
-      .action (type, name)->
-        creator = new Creator type, name
-        creator.create()
+  init: ->
+
+    program.command "watch"
+    .action =>
+      @logger.info "Start watch directory ..."
+
+    program.command "create <type> <name>"
+    .action (type, name)=>
+
+      @logger.info "Run `create` action with type `#{type}` and name `#{name}`"
+
+      creator = new Creator type, name
+      creator.create()
 
 
 
@@ -22,8 +29,16 @@ class VakooManager
     program.parse process.argv
 
 
+  getLogger: (label)->
+    return winston.loggers.add label, {
+      console:
+        colorize: true
+        label: label
+    }
 
-new VakooManager()
+global.manager = new VakooManager()
+
+manager.init()
 
 
 
