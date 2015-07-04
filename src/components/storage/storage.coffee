@@ -1,5 +1,6 @@
 
 Redis = require "./redis"
+Mysql = require "./mysql"
 
 _ = require "underscore"
 async = require "async"
@@ -15,26 +16,27 @@ class Storage
 
     @connectors = []
 
-    if @config.redis
-      unless @config.redis.main
-        @config.redis =
-          main: _.clone @config.redis
-
     for type, config of @config
+
+      unless @config[type].main
+        config =
+          main: _.clone @config[type]
+
       if type in vakoo.constants.DEFINED_STORAGES
         for storageName, storageConfig of config
           @add type, storageName, storageConfig
-
+      else
+        @logger.warn "Unkown storage type `#{type}`"
 
   add: (type, name, config)=>
-
-    unless type in ["redis"]
-      return @logger.warn "Unkown storage type `#{type}`"
 
     @[type] ?= {}
 
     if type is "redis"
       @[type][name] = new Redis name, config
+
+    if type is "mysql"
+      @[type][name] = new Mysql name, config
 
     if name is "main"
       vakoo[type] = @[type][name]
