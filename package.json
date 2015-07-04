@@ -1,6 +1,6 @@
 {
   "name": "vakoo",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Vakoo Framework",
   "main": "index.js",
   "scripts": {
@@ -15,7 +15,7 @@
     "framework",
     "simple"
   ],
-  "author": "Pasa",
+  "author": "Pasynkov Nikolay <a@pasa.me>",
   "license": "GNU",
   "bugs": {
     "url": "https://github.com/pasynkov/vakoo/issues"
