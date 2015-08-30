@@ -15,6 +15,9 @@ class Configurator
     if @projectConfig.storage
       @storage = @projectConfig.storage
 
+    if @projectConfig.initializers?.length
+      @initializers = @projectConfig.initializers
+
     if @projectConfig.web
       @web = @projectConfig.web
       @web.Router = require Path.resolve ".", constants.CONFIG_DIR, constants.DEFAULT_CONFIG_SCOPE, constants.ROUTER_FILE

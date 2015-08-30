@@ -60,4 +60,51 @@ class Redis
     return @client.connected
 
 
+  getex: (key, getter, ttl, callback)=>
+    if @connected()
+      @client.get key, (error, result)=>
+        if error
+          getter callback
+        else
+          if result?
+            try
+              result = JSON.parse result
+              result = if result.redisResult? then result.redisResult else result
+            callback null, result
+          else
+            getter (err, result)=>
+              if err or not result?
+                callback err
+              else
+                if _.isArray(result) or _.isObject(result)
+                  redisValue = JSON.stringify redisResult:result
+                @client.setex key, ttl, redisValue ? result, (err)->
+                  callback err, result
+    else
+      getter callback
+
+  get: (key, getter, callback)=>
+    if @connected()
+      @client.get key, (error, result)=>
+        if error
+          getter callback
+        else
+          if result?
+            try
+              result = JSON.parse result
+              result = if result.redisResult? then result.redisResult else result
+            callback null, result
+          else
+            getter (err, result)=>
+              if err or not result?
+                callback err
+              else
+                if _.isArray(result) or _.isObject(result)
+                  redisValue = JSON.stringify redisResult:result
+                @client.set key, redisValue ? result, (err)->
+                  callback err, result
+    else
+      getter callback
+
+
 module.exports = Redis

@@ -8,6 +8,7 @@ class Static
   constructor: ->
 
 
+
   readFile: (path, callback)=>
     async.waterfall(
       [
@@ -16,6 +17,7 @@ class Static
       ]
       callback
     )
+
 
   readBuffer: (path, callback)=>
 

@@ -1,6 +1,7 @@
 
 Redis = require "./redis"
 Mysql = require "./mysql"
+Mongo = require "./mongo"
 
 _ = require "underscore"
 async = require "async"
@@ -10,7 +11,7 @@ class Storage
 
   constructor: ->
 
-    @config = vakoo.configurator.storage
+    @config = _.omit(vakoo.configurator.storage, "enable")
 
     @logger = vakoo.logger.storage
 
@@ -37,6 +38,9 @@ class Storage
 
     if type is "mysql"
       @[type][name] = new Mysql name, config
+
+    if type is "mongo"
+      @[type][name] = new Mongo name, config
 
     if name is "main"
       vakoo[type] = @[type][name]

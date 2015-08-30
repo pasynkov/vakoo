@@ -32,6 +32,9 @@ constants = {
   DEFAULT_MYSQL_CONFIG:
     host: "127.0.0.1"
     port: 3306
+  DEFAULT_MONGO_CONFIG:
+    host: "127.0.0.1"
+    port: 27017
   ROUTER_FILE: "router"
 }
 
