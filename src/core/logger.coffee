@@ -7,7 +7,7 @@ class Logger
 
   constructor: (@configurator)->
 
-    @config = @extendConfig @configurator.projectConfig.logger or @getDefaultConfig()
+    @config = @extendConfig @configurator.projectConfig.loggers or @getDefaultConfig()
 
     @initialize()
 
@@ -33,14 +33,14 @@ class Logger
 
     for loggerName, loggerConfig of @config
 
-      label = (loggerConfig.label or loggerName[0].toUpperCase() + loggerName[1...].toLowerCase()) + ""
+      label = (loggerConfig.label or loggerName[0].toUpperCase() + loggerName[1...]) + ""
 
       delete loggerConfig.label
 
       for transportName, transportConfig of loggerConfig
         transportConfig.label = label
 
-      @[loggerName.toLowerCase()] = winston.loggers.add loggerName, loggerConfig
+      @[loggerName] = winston.loggers.add loggerName, loggerConfig
 
 
 module.exports = Logger

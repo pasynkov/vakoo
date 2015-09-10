@@ -2,8 +2,7 @@
 
 
 constants = {
-  DEFAULT_ENVIRONMENT: "development"
-  DEFAULT_CONFIG_SCOPE: "default"
+  DEFAULT_ENVIRONMENT: "default"
   CONFIG_DIR: "config"
   CONTROLLERS_DIR: "controllers"
   PROJECT_CONFIG_FILE: "project"
@@ -16,6 +15,7 @@ constants = {
     "storage"
     "web"
     "context"
+    "cron"
   ]
   DEFAULT_LOGGER_CONFIG:
     console:
