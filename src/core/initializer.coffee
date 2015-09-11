@@ -29,7 +29,6 @@ class Initializer
 
       @initializers.push @startCrons
 
-
     if vakoo.configurator.web?.enable
       vakoo.web = new Web
       @addInitializer vakoo.web.start
@@ -38,11 +37,13 @@ class Initializer
     vakoo.classes = {}
     vakoo.classes.Static = require "../classes/static"
 
+    @initialize callback
+
 
   addInitializer: (initializer)=>
     @initializers.push initializer
 
-  run: (callback)=>
+  initialize: (callback)=>
 
     async.waterfall(
       @initializers

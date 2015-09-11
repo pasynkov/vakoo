@@ -1,30 +1,42 @@
 
 constants = require "./constants"
 Path = require "path"
+_ = require "underscore"
 
 class Configurator
 
-  constructor: (@environment)->
+  constructor: (@context, @environment = constants.DEFAULT_ENVIRONMENT)->
 
-    @environment ?= constants.DEFAULT_ENVIRONMENT
-
-    @projectConfig = require Path.resolve ".", constants.CONFIG_DIR, @environment, constants.PROJECT_CONFIG_FILE
+    @envConfig = require Path.resolve ".", constants.CONFIG_DIR, @environment, "config"
 
     @package = require Path.resolve(".", "package.json")
 
-    @instanceName = @package.name + "_" + @environment
+    if @context
+      @contextConfig = require Path.resolve ".", constants.CONFIG_DIR, @context, "config"
+      @instanceName = vakoo.instanceName = @package.name + "_" + @context + "_" + @environment
 
-    if @projectConfig.storage
-      @storage = @projectConfig.storage
+      @config = {}
 
-    if @projectConfig.initializers?.length
-      @initializers = @projectConfig.initializers
+      for key, val of @envConfig
+        @config[key] = _.defaults @contextConfig[key] ? {}, val
 
-    if @projectConfig.crons?.length
-      @crons = @projectConfig.crons
+      @config = _.defaults @contextConfig, @config
 
-    if @projectConfig.web
-      @web = @projectConfig.web
+    else
+      @config = @envConfig
+      @instanceName = vakoo.instanceName = @package.name + "_" + @environment
+
+    if @config.storage
+      @storage = @envConfig.storage
+
+    if @config.initializers?.length
+      @initializers = @config.initializers
+
+    if @config.crons?.length
+      @crons = @config.crons
+
+    if @config.web
+      @web = @config.web
       @web.Router = require Path.resolve ".", constants.CONFIG_DIR, @environment, constants.ROUTER_FILE
 
 

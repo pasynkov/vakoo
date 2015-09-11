@@ -19,12 +19,18 @@ class Storage
 
     for type, config of @config
 
-      unless @config[type].main
-        config =
+      if vakoo.configurator.contextConfig?
+        if vakoo.configurator.contextConfig.storage?[type]
+          config = @config[type] = _.defaults vakoo.configurator.contextConfig.storage[type], config
+
+      unless config.main
+        config = @config[type] =
           main: _.clone @config[type]
 
       if type in vakoo.constants.DEFINED_STORAGES
         for storageName, storageConfig of config
+          if storageConfig.enable is false
+            continue
           @add type, storageName, storageConfig
       else
         @logger.warn "Unkown storage type `#{type}`"

@@ -12,6 +12,10 @@ class VakooManager
 
   init: ->
 
+    program.command "start"
+    .action =>
+      @logger.info "aza"
+
     program.command "watch"
     .action =>
       @logger.info "Start watch directory ..."

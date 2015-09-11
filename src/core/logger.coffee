@@ -5,9 +5,9 @@ _ = require "underscore"
 
 class Logger
 
-  constructor: (@configurator)->
+  constructor: ->
 
-    @config = @extendConfig @configurator.projectConfig.loggers or @getDefaultConfig()
+    @config = @extendConfig vakoo.configurator?.config?.loggers or @getDefaultConfig()
 
     @initialize()
 
