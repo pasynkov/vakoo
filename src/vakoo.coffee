@@ -18,6 +18,8 @@ class Vakoo
 
     @logger = new Logger
 
+    @emit = false
+
     for action, params of commands
       do (action, params)=>
 
@@ -28,15 +30,21 @@ class Vakoo
             emitter.option "-#{option[0]} --#{option[1]} #{option[2][0]}#{option[1]}#{option[2][1]}"
         emitter.action (args)=>
           if @["action#{params.name}"]?
+            @emit = true
             @["action#{params.name}"].apply @, [args, callback]
           else
             @logger.main.error "Action `#{params.name}` not found"
 
     program.parse process.argv
 
-  actionWatch: ()=>
+  actionWatch: =>
 
-  actionStart: ()=>
+  actionStart: ({env, context}, callback)=>
+    @configurator = new Configurator context, env
+    @logger = new Logger
+
+    @initializer = new Initializer =>
+      callback()
 
   actionRun: ({script, env, context}, callback)=>
 
