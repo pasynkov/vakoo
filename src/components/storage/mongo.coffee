@@ -1,6 +1,31 @@
 
 _ = require "underscore"
-MongoDB = require 'mongodb'
+MongoDB = require "mongodb"
+async = require "async"
+
+class MongoCollection
+
+  constructor: (@collection)->
+
+  find: ([query, fields, options] ..., callback)=>
+
+    query ?= {}
+
+    @collection.find query, fields, options, (err, cursor)->
+      if err
+        return callback err
+      cursor.toArray callback
+
+
+  count: ([query, options]..., callback)=>
+
+    @collection.count query, options, callback
+
+
+  findOne: ([query, fields, options] ..., callback)=>
+
+    @collection.findOne query, fields, options, callback
+
 
 class Mongo
 
@@ -42,6 +67,9 @@ class Mongo
         callback()
 
   collection: (name)=>
+    new MongoCollection @collectionNative name
+
+  collectionNative: (name)=>
     @client.collection(name)
 
 

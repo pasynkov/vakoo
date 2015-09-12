@@ -53,6 +53,18 @@ class Storage
 
     @connectors.push @[type][name].connect
 
+  subscribe: (callback)=>
+
+    async.map(
+      _.pairs vakoo.configurator.subscribe
+      ([subscriber, config], done)=>
+        if @redis[config.redis]?.connected()
+          @redis[config.redis].subscribe subscriber, config, done
+        else
+          @logger.error "Redis `#{config.redis}` not defined or not connected for subscribe."
+          done()
+      callback
+    )
 
   connect: (callback)=>
 

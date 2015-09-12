@@ -12,6 +12,8 @@ class Redis
 
     @config = _.defaults @config, vakoo.constants.DEFAULT_REDIS_CONFIG
 
+    @subscribers = {}
+
     @client =
       connected: false
 
@@ -105,6 +107,44 @@ class Redis
                   callback err, result
     else
       getter callback
+
+  subscribe: (name, config, callback)=>
+
+    @subscribers[name] = {
+      config
+      redis: new Redis "#{name}Subscriber", @config
+      logger: vakoo.logger.addLogger "#{name}Subscriber"
+    }
+
+    @subscribers[name].redis.connect =>
+
+      client = @subscribers[name].redis.client
+
+      @subscribers[name].logger.info "Successfully connected"
+
+      Script = require "#{process.cwd()}/subscribers/#{config.script}"
+
+      for channel in config.channels
+        client.subscribe channel
+        @subscribers[name].logger.info "Successfully subscribed to channel `#{channel}`"
+
+      client.on "message", (channel, message)=>
+
+        @subscribers[name].logger.info "Incoming message from channel `#{channel}`"
+
+        try
+          message = JSON.parse message
+
+        new Script channel, message, (err)=>
+          if err
+            @subscribers[name].logger.error "Event failed with err: `#{err}`"
+          else
+            @subscribers[name].logger.info "Event complete successfully"
+
+      callback()
+
+
+
 
 
 module.exports = Redis

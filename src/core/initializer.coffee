@@ -21,6 +21,9 @@ class Initializer
       vakoo.storage = new Storage
       @addInitializer vakoo.storage.connect
 
+    if vakoo.configurator.subscribe
+      @addInitializer vakoo.storage.subscribe
+
     if vakoo.configurator.initializers?.length
 
       @initializers.push @customInitializer
@@ -81,11 +84,12 @@ class Initializer
 
         do (Script, task)=>
 
-          cronLogger.info "Start `#{task.name}` cron-task. #{new Date()}"
+          cronLogger.info "Register `#{task.name}` cron-task successfully"
 
           new CronJob {
             cronTime: task.time
             onTick: ->
+              cronLogger.info "Start `#{task.name}` cron-task. #{new Date()}"
               new Script ->
                 cronLogger.info "Complete `#{task.name}` cron-task. #{new Date()}"
             start: true

@@ -35,6 +35,9 @@ class Configurator
     if @config.crons?.length
       @crons = @config.crons
 
+    unless _.isEmpty @config.subscribe
+      @subscribe = @config.subscribe
+
     if @config.web
       @web = @config.web
       @web.Router = require Path.resolve ".", constants.CONFIG_DIR, @environment, constants.ROUTER_FILE

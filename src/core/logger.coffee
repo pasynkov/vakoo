@@ -29,18 +29,27 @@ class Logger
 
     config
 
-  initialize: ->
+  initialize: =>
 
     for loggerName, loggerConfig of @config
 
-      label = (loggerConfig.label or loggerName[0].toUpperCase() + loggerName[1...]) + ""
+      @addLogger loggerName, loggerConfig
 
-      delete loggerConfig.label
 
-      for transportName, transportConfig of loggerConfig
-        transportConfig.label = label
+  addLogger: (name, config = {})->
 
-      @[loggerName] = winston.loggers.add loggerName, loggerConfig
+    config = _.defaults config, constants.DEFAULT_LOGGER_CONFIG
+
+    label = (config.label or name[0].toUpperCase() + name[1...]) + ""
+
+    delete config.label
+
+    for transportName, transportConfig of config
+      transportConfig.label = label
+
+    @[name] = winston.loggers.add name, config
+
+    return @[name]
 
 
 module.exports = Logger

@@ -34,10 +34,12 @@
     "handlebars": "^3.0.3",
     "mkdirp": "^0.5.1",
     "mongo": "^0.1.0",
+    "mongo-sql": "^2.7.0",
     "mongodb": "^2.0.42",
     "mysql": "^2.7.0",
     "redis": "^0.12.1",
     "underscore": "^1.8.3",
+    "underscore.string": "^3.2.2",
     "winston": "^1.0.1"
   },
   "bin": {

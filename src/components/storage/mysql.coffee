@@ -2,6 +2,28 @@
 _ = require "underscore"
 
 mysql = require "mysql"
+build = require("mongo-sql").sql
+
+class MysqlTable
+
+  constructor: (@mysql, @tableName)->
+
+  find: ([query] ..., callback)=>
+
+    options =
+      type: "select"
+      table: @tableName
+      where: query
+
+    @mysql.buildQuery options, (err, sql)=>
+      if err
+        return callback err
+
+      @mysql.execute sql, callback
+
+
+
+
 
 class Mysql
 
@@ -27,7 +49,20 @@ class Mysql
 
       callback err
 
+  table: (name)=>
+    new MysqlTable @, name
 
+  collection: (name)=>
+    @table name
+
+  buildQuery: (options, callback)=>
+    query = build(options).toQuery()
+    console.log query
+    return
+    callback null, query
+
+  execute: (query, callback)=>
+    @client.query query, callback
 
 
 module.exports = Mysql
