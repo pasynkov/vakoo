@@ -9,10 +9,14 @@ class Configurator
 
     @envConfig = require Path.resolve ".", constants.CONFIG_DIR, @environment, "config"
 
+    @defaultConfig = require Path.resolve ".", constants.CONFIG_DIR, constants.DEFAULT_ENVIRONMENT, "config"
+
+    @envConfig = _.defaults @envConfig, @defaultConfig
+
     @package = require Path.resolve(".", "package.json")
 
     if @context
-      @contextConfig = require Path.resolve ".", constants.CONFIG_DIR, @context, "config"
+      @contextConfig = require Path.resolve ".", constants.CONFIG_DIR, @environment, @context
       @instanceName = vakoo.instanceName = @package.name + "_" + @context + "_" + @environment
 
       @config = {}
@@ -27,7 +31,12 @@ class Configurator
       @instanceName = vakoo.instanceName = @package.name + "_" + @environment
 
     if @config.storage
-      @storage = @envConfig.storage
+
+      @config.storage = _.defaults @config.storage, @defaultConfig.storage
+
+      if not _.isEmpty(@config.storage) and @config.storage.enable isnt false
+        @config.storage.enable = true
+      @storage = @config.storage
 
     if @config.initializers?.length
       @initializers = @config.initializers

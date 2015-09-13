@@ -46,6 +46,7 @@ class Storage
       @[type][name] = new Mysql name, config
 
     if type is "mongo"
+      console.log config
       @[type][name] = new Mongo name, config
 
     if name is "main"
