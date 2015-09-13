@@ -2,7 +2,19 @@
 _ = require "underscore"
 
 mysql = require "mysql"
-build = require("mongo-sql").sql
+#todo mysql support sapient here https://github.com/goodybag/mongo-sql/issues/121
+buildOld = require("mongo-sql").sql
+build = (query)->
+  result = buildOld query
+  {
+    values: result.values
+    toString: ->
+      query = result.toString().replace /\$\d+/g, (str)->
+        i = +str.substring(1) - 1
+        val = result.values[ i ]
+        return if typeof val is "string" then "'#{val}'" else val
+      query = query.replace /\"/g, "`"
+  }
 
 class MysqlTable
 
@@ -20,8 +32,6 @@ class MysqlTable
         return callback err
 
       @mysql.execute sql, callback
-
-
 
 
 
@@ -56,9 +66,7 @@ class Mysql
     @table name
 
   buildQuery: (options, callback)=>
-    query = build(options).toQuery()
-    console.log query
-    return
+    query = build(options).toString()
     callback null, query
 
   execute: (query, callback)=>
