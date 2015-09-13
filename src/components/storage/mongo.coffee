@@ -24,6 +24,9 @@ class MongoCollection
 
   findOne: ([query, fields, options] ..., callback)=>
 
+    if query._id
+      query._id = MongoDB.ObjectID query._id
+
     @collection.findOne query, fields, options, callback
 
 
