@@ -10,6 +10,7 @@ class Context
       method: @requester.method
       path: @requester.path
       query: @requester.query
+      url: @requester.url
       body: @requester.body
       ip: @requester.ip
       userAgent: @requester.headers['user-agent'] or ""
@@ -19,6 +20,7 @@ class Context
     @response =
       code: 200
       data: null
+      redirect: false
 
     @data =
     ## TODO: проверить, вроде как нигде не используется
