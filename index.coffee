@@ -1,3 +1,8 @@
+fs = require "fs"
+path = require "path"
+if fs.existsSync(path.join(process.cwd(), 'newrelic.js'))
+  require 'newrelic'
+
 Vakoo = require "./src/vakoo"
 
 new Vakoo (err)->
