@@ -33,6 +33,7 @@ class Context
   sendHtml: (err, html)=>
 
     if @response.redirect
+      @logger.info "Redirect to `#{@response.redirect}`"
       return @responser.redirect @response.redirect
 
     @responser.send err or html
