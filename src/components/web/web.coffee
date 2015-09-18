@@ -20,6 +20,7 @@ class Web
 
     @server.start =>
       @logger.info "start listen port `#{@config.port}`"
+      callback()
 
 
 module.exports = Web
