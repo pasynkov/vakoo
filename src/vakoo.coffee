@@ -79,7 +79,8 @@ class Vakoo
       catch e
         callback e
 
-
+  production: =>
+    @configurator.environment is "stable"
 
 
 
