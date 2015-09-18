@@ -32,6 +32,9 @@ class Context
 
   sendHtml: (err, html)=>
 
+    if @response.redirect
+      return @responser.redirect @response.redirect
+
     @responser.send err or html
 
 module.exports = Context

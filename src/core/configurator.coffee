@@ -7,9 +7,9 @@ class Configurator
 
   constructor: (@context, @environment = constants.DEFAULT_ENVIRONMENT)->
 
-    @envConfig = require Path.resolve ".", constants.CONFIG_DIR, @environment, "config"
+    @envConfig = require Path.resolve ".", constants.CONFIG_DIR, @environment, @context or "config"
 
-    @defaultConfig = require Path.resolve ".", constants.CONFIG_DIR, constants.DEFAULT_ENVIRONMENT, "config"
+    @defaultConfig = require Path.resolve ".", constants.CONFIG_DIR, constants.DEFAULT_ENVIRONMENT, @context or "config"
 
     @envConfig = _.defaults @envConfig, @defaultConfig
 
@@ -49,7 +49,10 @@ class Configurator
 
     if @config.web
       @web = @config.web
-      @web.Router = require Path.resolve ".", constants.CONFIG_DIR, @environment, constants.ROUTER_FILE
+      try
+        @web.Router = require Path.resolve ".", constants.CONFIG_DIR, @environment, constants.ROUTER_FILE
+      catch
+        @web.Router = require Path.resolve ".", constants.CONFIG_DIR, constants.DEFAULT_ENVIRONMENT, constants.ROUTER_FILE
 
 
 
