@@ -37,6 +37,7 @@
     "mongo-sql": "^2.7.0",
     "mongodb": "^2.0.42",
     "mysql": "^2.7.0",
+    "newrelic": "^1.22.0",
     "redis": "^0.12.1",
     "underscore": "^1.8.3",
     "underscore.string": "^3.2.2",

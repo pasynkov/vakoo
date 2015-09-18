@@ -8,6 +8,10 @@ commands = require "./core/commands"
 program = require "commander"
 async = require "async"
 
+fs = require "fs"
+path = require "path"
+newrelic = if fs.existsSync(path.join(process.cwd(), 'newrelic.js')) then require 'newrelic' else null
+
 class Vakoo
 
   constructor: (callback)->
