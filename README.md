@@ -1,4 +1,4 @@
 vakoo
 =====
 
-Vakoo Engine. NodeJS CMS.
+Vakoo Engine. NodeJS Microframework.
