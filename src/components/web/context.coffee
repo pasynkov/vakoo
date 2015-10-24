@@ -1,10 +1,12 @@
+_ = require "underscore"
+
 class Context
 
   constructor: (@requester, @responser, @controllerName, @action)->
 
     @logger = vakoo.logger.context
 
-    @logger.info "incoming request to `#{@requester.url}`. Run controller `#{@controllerName}` with action `#{@action}`"
+    @logger.info "incoming `#{@requester.method}` request to `#{@requester.url}`. Run controller `#{@controllerName}` with action `#{@action}`"
 
     @request =
       method: @requester.method
@@ -36,6 +38,19 @@ class Context
       @logger.info "Redirect to `#{@response.redirect}`"
       return @responser.redirect @response.redirect
 
-    @responser.send err or html
+    @sendResult err, html
+
+  sendResult: (err, result)=>
+
+    status = 200
+
+    if err
+      @logger.info err
+      status = 404
+
+    if _.isNumber result
+      result += ""
+
+    @responser.status(status).send err or result
 
 module.exports = Context

@@ -33,6 +33,68 @@ class MysqlTable
 
       @mysql.execute sql, callback
 
+  findOne: ([query] ..., callback)=>
+
+    options =
+      type: "select"
+      table: @tableName
+      where: query
+      limit: 1
+
+    @executeOptions options, (err, [row])=>
+      callback err, row
+
+  update: ([query, updates]..., callback)=>
+
+    options =
+     type: "update"
+     table: @tableName
+     updates: updates
+     where: query
+
+    @executeOptions options, (err, result)=>
+      callback err
+
+  insert: ([object, params]..., callback)=>
+
+    options =
+      type: "insert"
+      table: @tableName
+      values: object
+
+    if params.updateOnDuplicate
+      return @mysql.buildQuery options, (err, sql)=>
+        if err
+          return err
+
+        sql += " ON DUPLICATE KEY UPDATE "
+
+        sql += _.map(
+          params.updateOnDuplicate.set or []
+          (field)->
+
+            val = object[field]
+
+            if _.isNaN(+val)
+              val = "'#{val}'"
+            "`#{field}` = #{val}"
+        ).join(", ")
+
+        if params.updateOnDuplicate.ignore
+          sql += "`#{params.updateOnDuplicate.ignore}` = `#{params.updateOnDuplicate.ignore}`"
+
+        @mysql.execute sql, callback
+
+    @executeOptions options, (err, {insertId})=>
+      callback err, insertId
+
+  executeOptions: (options, callback)=>
+
+    @mysql.buildQuery options, (err, sql)=>
+      if err
+        return callback err
+
+      @mysql.execute sql, callback
 
 
 class Mysql
@@ -70,7 +132,10 @@ class Mysql
     callback null, query
 
   execute: (query, callback)=>
-    @client.query query, callback
+    @client.query query, (err, result)=>
+      if err
+        @logger.error err
+      callback err, result
 
 
 module.exports = Mysql
