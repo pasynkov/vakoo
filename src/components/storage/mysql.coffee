@@ -55,6 +55,20 @@ class MysqlTable
     @executeOptions options, (err, result)=>
       callback err
 
+  remove: (query, callback)=>
+
+    options =
+      type: "delete"
+      table: @tableName
+      where: query
+
+    @executeOptions options, (err, result)=>
+      callback err
+
+  delete: (query, callback)=>
+
+    @remove query, callback
+
   insert: ([object, params]..., callback)=>
 
     options =
@@ -62,7 +76,7 @@ class MysqlTable
       table: @tableName
       values: object
 
-    if params.updateOnDuplicate
+    if params?.updateOnDuplicate
       return @mysql.buildQuery options, (err, sql)=>
         if err
           return err
