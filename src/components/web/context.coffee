@@ -15,6 +15,7 @@ class Context
       url: @requester.url
       body: @requester.body
       ip: @requester.ip
+      params: @requester.params
       userAgent: @requester.headers['user-agent'] or ""
       headers: @requester.headers
       options: {}
