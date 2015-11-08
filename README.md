@@ -1,3 +1,9 @@
+#Vakoo
+```
+NodeJS-based micro-framework.
+Just code your project's logic.
+```
+
 ##Installation
 
 ```sh
