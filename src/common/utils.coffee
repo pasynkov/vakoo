@@ -105,4 +105,6 @@ class Utils
       logMethod message
       callback()
 
+  @fileSlugify: (fileName)-> _.string.underscored fileName
+
 module.exports = Utils

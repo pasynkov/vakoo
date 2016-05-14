@@ -46,6 +46,14 @@ class Static
       else
         errorCallback "File `#{filePath}` not exists."
 
+  @getErrIfExists: (filePath, callback)->
+
+    Static.onExists(
+      filePath
+      -> callback "File `#{filePath}` already exists"
+      -> callback()
+    )
+
   @createFolderIfNotExists: (folderPath, callback)->
 
     fs.exists folderPath, (exists)->
@@ -63,6 +71,15 @@ class Static
   @resolveFromCwd: (resolvingPath)->
 
     path.resolve process.cwd(), resolvingPath
+
+  @getDirFiles: (dirPath, callback)->
+
+    fs.readdir dirPath, callback
+
+  @getFileNameWithoutExt: (fileName)->
+
+    ext = path.extname fileName
+    path.basename fileName, ext
 
 
 
