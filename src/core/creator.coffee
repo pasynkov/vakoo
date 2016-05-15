@@ -41,11 +41,11 @@ class Creator
 
   createController: (name, callback)=>
 
-    @createModule name, Vakoo.c.FOLDER_CONTROLLERS, TYPE_CONTROLLER, false, callback
+    @createModule name, Vakoo.c.PATH_CONTROLLERS, TYPE_CONTROLLER, false, callback
 
   createInitializer: (name, callback)=>
 
-    @createModule name, Vakoo.c.PATH_CONTROLLERS, TYPE_INITIALIZER, true, callback
+    @createModule name, Vakoo.c.PATH_INITIALIZERS, TYPE_INITIALIZER, true, callback
 
 
   createTimer: (name, callback)=>
@@ -58,8 +58,6 @@ class Creator
       return callback "Need type of migration. --mongo or --mysql."
 
     migrationPath = if @mysql then Vakoo.c.PATH_MIGRATIONS_MYSQL else Vakoo.c.PATH_MIGRATIONS_MONGO
-
-    console.log migrationPath
 
     name = _.now() + "_" + name
 

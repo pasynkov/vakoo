@@ -58,8 +58,6 @@ class Utils
 
           requestKeys = _.without _.keys(packageInfo), "name", "dependencies"
 
-          console.log requestKeys
-
           async.mapSeries(
             requestKeys
             (field, done)=>

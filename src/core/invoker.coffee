@@ -21,6 +21,7 @@ class Invoker
 
     program
       .command "init [name]"
+      .alias "i"
       .description "create and initialize Vakoo application"
       .option "-e, --env [items]", "List of environment names. Ex: dev,test,stable", ((val, def)-> if val then val.split(",") else def), [Vakoo.c.ENV_DEFAULT]
       .action @init
@@ -38,7 +39,49 @@ class Invoker
       .action @create
       .on "--help", Vakoo.Creator::getHelpText
 
+    program
+      .command "start"
+      .alias "c"
+      .description "start vakoo application with env (def. default)"
+      .option "-e, --env [env]", "environment"
+      .action @start
+
+    program
+      .command "*"
+      .action (command)=> console.log "Unknown command `#{command}`"
+
     program.parse process.argv
+
+  start: ({env})=>
+
+    async.waterfall(
+      [
+        if _.isEmpty(env) then @getAllEnvs else async.apply @getEnvByNames, env
+        (envs, taskCallback)->
+
+          if _.isEmpty(envs)
+            taskCallback "Not found environment: `#{env}`"
+          else
+            taskCallback null, _.first(envs)
+        (env, taskCallback)->
+
+          taskCallback null, new Vakoo.Application(env)
+
+        (app, taskCallback)->
+
+          window = {}
+          window.app = app
+          global.app = app
+
+          app.initialize taskCallback
+      ]
+      (err)=>
+        if err
+          @logger.error err
+          process.exit()
+
+        app.start()
+    )
 
   create: (type, names, {env, mysql, mongo, path})=>
 
@@ -110,7 +153,7 @@ class Invoker
         process.exit()
     )
 
-  @installVakoo: (callback)=>
+  installVakoo: (callback)=>
 
     async.waterfall(
       [
