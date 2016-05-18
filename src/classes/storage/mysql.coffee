@@ -77,10 +77,10 @@ class MysqlTable
       table: @tableName
       values: object
 
+    #todo fix this
     if params?.updateOnDuplicate
       return @mysql.buildQuery options, (err, sql)=>
-        if err
-          return err
+        return callback err if err
 
         sql += " ON DUPLICATE KEY UPDATE "
 
