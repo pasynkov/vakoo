@@ -18,9 +18,18 @@ class Application
     async.auto(
       {
         config: @configs.initialize
+        storage: [
+          "config"
+          @initializeStorage
+        ]
         web: [
           "config"
+          "storage"
           @initializeWeb
+        ]
+        end: [
+          "web"
+          Vakoo.Utils.asyncLog @logger.info, "Initialized successfully"
         ]
       }
       callback
@@ -35,8 +44,15 @@ class Application
 
     else callback()
 
-  start: ->
-    console.log "app start"
+  initializeStorage: (..., callback)=>
+
+    if not _.isEmpty(@configs.storage) and @configs.storage.enable isnt false
+      @storage = new Vakoo.Storage @configs.storage
+
+      @storage.initialize callback
+
+    else callback()
+
 
 
 module.exports = Application

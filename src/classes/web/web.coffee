@@ -86,7 +86,6 @@ class Web
       if _.isArray Controller::routes
         for route in Controller::routes
           if (params = @createRouteParamFromArray(route, name))
-            console.log "params", params
             @server.addRoute.apply @server, params
 
     callback()

@@ -75,8 +75,6 @@ class Invoker
         if err
           @logger.error err
           process.exit()
-
-        app.start()
     )
 
   create: (type, names, {env, mysql, mongo, path})=>

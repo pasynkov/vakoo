@@ -31,6 +31,8 @@
     "cookie-parser": "1.4.x",
     "express": "4.13.x",
     "handlebars": "4.0.x",
+    "mongo-sql": "^2.7.2",
+    "mysql": "^2.10.2",
     "underscore": "1.8.x",
     "underscore.string": "3.3.x",
     "winston": "2.2.x"

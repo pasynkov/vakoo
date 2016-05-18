@@ -6,9 +6,12 @@ Creator = require "./creator"
 Constants = require "../constants"
 Application = require "./application"
 Configurator = require "../classes/configurator"
+
 Web = require "../classes/web/web"
 WebServer = require "../classes/web/server"
 WebContext = require "../classes/web/context"
+
+Storage = require "../classes/storage/storage"
 
 Controller = require "../extenders/controller"
 
@@ -25,6 +28,7 @@ Vakoo =
   WebServer: WebServer
   WebContext: WebContext
   Controller: Controller
+  Storage: Storage
 
 Vakoo.c = new Constants Vakoo
 
