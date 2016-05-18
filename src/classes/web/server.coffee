@@ -45,7 +45,6 @@ class WebServer
     @_currentRoutes.push [method, route, controllerName, action]
 
     @express[method] route, (req, res)->
-      console.log route, controllerName, action
       context = new Vakoo.WebContext req, res, controllerName, action
       new app.web.controllers[controllerName](context)[context.getAction()]()
 

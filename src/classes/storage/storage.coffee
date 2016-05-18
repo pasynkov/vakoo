@@ -23,11 +23,21 @@ class Storage
   initializeMysql: (callback)=>
     if (mysqlConfig = @validateConfig(@config.mysql, "mysql"))
 
+      mainConnectionName = _.first _.keys mysqlConfig
+
       async.eachOf(
         mysqlConfig
-        (config, name, done)=>
+        (config, connectionName, done)=>
 
-          console.log "mysql", name, config
+          @[connectionName] = new Vakoo.Mysql config, connectionName
+
+          if connectionName is mainConnectionName
+            @main = @[connectionName]
+            app.mysql ?= {}
+            app.mysql = @main
+
+
+          @[connectionName].connect done
 
         callback
       )
