@@ -4,55 +4,102 @@ CookieParser = require "cookie-parser"
 Compression = require "compression"
 createStatic = require "connect-static"
 
+async = require "async"
+_ = require "underscore"
+
 class WebServer
 
   constructor: (@config)->
 
+    @logger = new Vakoo.Logger {
+      label: "WebServer"
+    }
+
     @express = Express()
 
-    @express.use Compression()
-    @express.use BodyParser.json()
-    @express.use BodyParser.text()
-    @express.use BodyParser.raw()
-    @express.use BodyParser.urlencoded(
+    @addMiddleware Compression()
+    @addMiddleware BodyParser.json()
+    @addMiddleware BodyParser.text()
+    @addMiddleware BodyParser.raw()
+    @addMiddleware BodyParser.urlencoded(
       extended: true
     )
-    @express.use CookieParser()
+    @addMiddleware CookieParser()
 
-  addRoute: (method, route, controllerName, action)->
+    @_currentRoutes = []
+
+  hasRoutes: => not _.isEmpty @_currentRoutes
+
+  addMiddleware: ([path]..., middleware)=>
+
+    if path
+      @express.use path, middleware
+    else
+      @express.use middleware
+
+  addRoute: (method, route, controllerName, action = null)->
+
+    if method is "*"
+      method = "all"
+
+    @_currentRoutes.push [method, route, controllerName, action]
+
     @express[method] route, (req, res)->
+      console.log route, controllerName, action
       context = new Vakoo.WebContext req, res, controllerName, action
-      new app.controllers[controllerName](context)[action]()
+      new app.web.controllers[controllerName](context)[context.getAction()]()
 
   getPort: => process.env.NODE_PORT or @config.port
 
-  listen: =>
+  listen: (callback)=>
 
     @express.listen @getPort(), ->
+
+    callback()
 
 
   start: (callback)=>
 
-    @listen()
+    async.waterfall(
+      [
+        @setupStatic
+        @listen
+      ]
+      callback
+    )
+
+  setupStatic: (callback)=>
+
+    if @config.static
+
+      if @config.static.cache
+
+        @setupCachedStatic callback
+
+      else
+
+        @setupExpressStatic callback
+
+    else callback()
+
+  setupExpressStatic: (callback)=>
+
+    @addMiddleware "/", Express.static( Vakoo.Static.resolveFromCwd(@config.static.path) )
 
     callback()
 
-#    if @config.static
-#
-#      if @config.cacheStatic
-#        createStatic {dir: "#{Path.resolve('.')}/#{@config.static}"}, (err, middleware)=>
-#          if err
-#            @server.use '/', Express.static("#{Path.resolve('.')}/#{@config.static}")
-#          else
-#            @server.use "/", middleware
-#          start()
-#      else
-#        @server.use '/', Express.static("#{Path.resolve('.')}/#{@config.static}")
-#        start()
-#
-#    else
-#      @server.use '/', Express.static("#{Path.resolve('.')}/static")
-#      start()
+  setupCachedStatic: (callback)=>
+
+    createStatic {
+      dir: Vakoo.Static.resolveFromCwd(@config.static.path)
+    }, (err, middleware)=>
+
+      if err
+        @logger.error err
+        @setupExpressStatic callback
+      else
+        @addMiddleware "/", middleware
+        callback()
 
 
 module.exports = WebServer

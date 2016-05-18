@@ -20,6 +20,7 @@ class Web
         @loadControllers
         @loadRoutes
         Vakoo.Utils.asyncLog @logger.info, "Web start at port `#{@server.getPort()}`"
+        @server.start
       ]
       callback
     )
@@ -60,22 +61,69 @@ class Web
 
         try
           Router = require Vakoo.c.PATH_CONFIGS + Vakoo.c.PATH_SEPARATOR + @config.routes.file
-
           new Router @server
-
-        callback()
+          callback()
+        catch e
+          callback e
 
       else if _.isArray(@config.routes)
 
         for route in @config.routes
-          if _.isArray(route)
-            console.log route
 
+          if (params = @createRouteParamFromArray(route))
+            @server.addRoute.apply @server, params
+
+        callback()
 
       else callback()
     else callback()
 
   loadControllersRoutes: (callback)=>
+
+    return callback() if @server.hasRoutes()
+
+    for name, Controller of @controllers
+      if _.isArray Controller::routes
+        for route in Controller::routes
+          if (params = @createRouteParamFromArray(route, name))
+            console.log "params", params
+            @server.addRoute.apply @server, params
+
+    callback()
+
+  createRouteParamFromArray: (route, controller = null)->
+
+    return false unless _.isArray(route)
+
+    method = "*"
+    action = null
+
+    if controller
+
+      if route.length is 1
+        [path] = route
+      else if route.length is 2
+        [path, action] = route
+      else if route.length is 3
+        [method, path, action] = route
+
+    else
+
+      if route.length is 2
+        [path, controller] = route
+      else if route.length is 3
+        [path, controller, action] = route
+      else if route.length is 4
+        [method, path, controller, action] = route
+
+    unless action
+      path += ":action"
+
+    if controller and method and path
+      [method, path, controller, action]
+    else false
+
+
 
 
 

@@ -47,7 +47,6 @@ class Creator
 
     @createModule name, Vakoo.c.PATH_INITIALIZERS, TYPE_INITIALIZER, true, callback
 
-
   createTimer: (name, callback)=>
 
     @createModule name, Vakoo.c.PATH_TIMERS, TYPE_TIMER, true, callback
@@ -95,7 +94,8 @@ class Creator
             name: _.string.classify(name).replace /[0-9]/g, ""
           }
         async.apply Vakoo.Static.setFileContent, newFilePath
-        if addToConfig then async.apply(@addToConfigs, type, fileName) else async.asyncify(->)
+        #todo remove addToConfig param
+#        if addToConfig then async.apply(@addToConfigs, type, fileName) else async.asyncify(->)
       ]
       callback
     )

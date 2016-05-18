@@ -41,14 +41,10 @@ class Invoker
 
     program
       .command "start"
-      .alias "c"
+      .alias "s"
       .description "start vakoo application with env (def. default)"
       .option "-e, --env [env]", "environment"
       .action @start
-
-    program
-      .command "*"
-      .action (command)=> console.log "Unknown command `#{command}`"
 
     program.parse process.argv
 
