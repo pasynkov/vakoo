@@ -46,7 +46,7 @@ class WebServer
 
     @express[method] route, (req, res)->
       context = new Vakoo.WebContext req, res, controllerName, action
-      new app.web.controllers[controllerName](context)[context.getAction()]()
+      new _app.web.controllers[controllerName](context)[context.getAction()]()
 
   getPort: => process.env.NODE_PORT or @config.port
 

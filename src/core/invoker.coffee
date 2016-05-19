@@ -63,13 +63,13 @@ class Invoker
 
           taskCallback null, new Vakoo.Application(env)
 
-        (app, taskCallback)->
+        (_app, taskCallback)->
 
           window = {}
-          window.app = app
-          global.app = app
+          window._app = _app
+          global._app = _app
 
-          app.initialize taskCallback
+          _app.initialize taskCallback
       ]
       (err)=>
         if err

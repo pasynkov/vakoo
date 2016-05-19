@@ -34,6 +34,8 @@ class Mongo
 
   constructor: (config, @name = "main")->
 
+    @_config = config
+
     @logger = new Vakoo.Logger {
       label: "Mongo#{_.string.classify @name}"
     }
@@ -48,6 +50,8 @@ class Mongo
 
     @client =
       connected: false
+
+  isMain: => @_config.isMain is true
 
   connect: (callback)=>
 
@@ -73,9 +77,9 @@ class Mongo
         @logger.error error
         callback error
       else
-        @logger.info "`#{@name}` connected successfully"
+        @logger.info "Connected successfully"
         @client = connection
-        callback()
+        callback null, @
 
   collection: (name)=>
     new MongoCollection @collectionNative name

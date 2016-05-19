@@ -127,6 +127,8 @@ class Mysql
       label: "Mysql#{_.string.classify @name}"
     }
 
+    @_config = config
+
     @connected = false
 
     @config =
@@ -138,6 +140,8 @@ class Mysql
 #      connectTimeout: config.connectTimeout or 10000
 
     @createClient()
+
+  isMain: => @_config.isMain is true
 
   createClient: =>
 
@@ -161,7 +165,7 @@ class Mysql
 
     unless @_callbackCalled
       @_callbackCalled = true
-      @_callback err
+      @_callback err, @
 
   connect: (@_callback)=>
 

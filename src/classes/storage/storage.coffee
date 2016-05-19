@@ -1,49 +1,6 @@
 async = require "async"
 _ = require "underscore"
 
-MONGO = "mongo"
-MYSQL = "mysql"
-
-class DatabaseConfig
-
-  constructor: (config)->
-
-    @_isMain = config.isMain
-    @_name = config.name
-    @_config = _.omit config, ["name", "isMain"]
-
-  isMain: -> @_isMain is true
-
-  getName: -> @_name or "main"
-
-  getConnectionConfig: -> @_config
-
-  createConfigs: (rawConfig, type)->
-    return false unless rawConfig
-
-    ClassName = if type is MONGO then MongoConfig else MysqlConfig
-
-    configs = []
-
-    for config in DatabaseConfig::parseConfig(rawConfig)
-      configs.push new ClassName config
-
-    configs
-
-  parseConfig: (rawConfig)-> [_.defaults(rawConfig, {name: "main", isMain: true})]
-
-class MysqlConfig extends DatabaseConfig
-
-  constructor: -> super
-
-class MongoConfig extends DatabaseConfig
-
-  constructor: -> super
-
-  getDatabaseClass: -> Vakoo.Mongo
-
-  getType: -> MONGO
-
 class Storage
 
   constructor: (@config)->
@@ -66,29 +23,58 @@ class Storage
 
   initializeMongo: (callback)=>
 
-    @createConnection DatabaseConfig::createConfigs(@config.mongo, MONGO), callback
+    @createConnections(
+      @parseConfig(@config.mongo)
+      Vakoo.Mongo
+      (err, connections)=>
+        return callback err if err
 
-  createConnection: (configs, callback)=>
+        return callback err unless connections
 
-    return callback() unless configs
+        extender = {}
 
-    async.each(
-      configs
-      (config, done)=>
+        for conn in connections
+          extender[conn.name] = conn
+          if conn.isMain()
+            extender[conn.name] = conn
+            @mongo = conn
+            _app.mongo = conn
 
-        app[config.getType()] ?= {}
-        @[config.getType()] ?= {}
+        _.extend @mongo, extender
+        _.extend _app.mongo, extender
 
-        driver = new config.getDatabaseClass()(config.getConnectionConfig(), config.getName())
+        callback()
+    )
 
-        app[config.getType()][config.getName()] = @[config.getType()][config.getName()] = new config.getDatabaseClass()(config.getConnectionConfig(), config.getName())
+  parseConfig: (rawConfig)->
 
-        if config.isMain()
-          app[config.getType()].main = @[config.getType()].main = @[config.getType()][config.getName()]
+    return false unless rawConfig
 
-        console.log driver
+    config = {}
 
-        driver.connect done
+    if rawConfig.host
+      config.main = rawConfig
+      config.main.isMain = true
+      config
+    else
+      mainName = _.first _.keys rawConfig
+      rawConfig[mainName].isMain = true
+      rawConfig
+
+
+  createConnections: (config, Database, callback)=>
+
+    return callback() unless config
+
+    async.map(
+      _.keys config
+      (configKey, done)=>
+
+        connConfig = config[configKey]
+
+        connection = new Database connConfig, configKey
+
+        connection.connect done
 
       callback
     )
@@ -107,8 +93,8 @@ class Storage
 
           if connectionName is mainConnectionName
             @main = @[connectionName]
-            app.mysql ?= {}
-            app.mysql = @main
+            _app.mysql ?= {}
+            _app.mysql = @main
 
 
           @[connectionName].connect done
