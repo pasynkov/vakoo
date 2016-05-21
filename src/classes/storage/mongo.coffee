@@ -1,4 +1,5 @@
 _ = require "underscore"
+_.string = require "underscore.string"
 MongoDB = require "mongodb"
 async = require "async"
 

@@ -14,6 +14,7 @@ WebContext = require "../classes/web/context"
 Storage = require "../classes/storage/storage"
 Mysql = require "../classes/storage/mysql"
 Mongo = require "../classes/storage/mongo"
+Redis = require "../classes/storage/redis"
 
 Controller = require "../extenders/controller"
 
@@ -33,6 +34,7 @@ Vakoo =
   Storage: Storage
   Mysql: Mysql
   Mongo: Mongo
+  Redis: Redis
 
 Vakoo.c = new Constants Vakoo
 

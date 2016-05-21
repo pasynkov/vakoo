@@ -1,5 +1,6 @@
 async = require "async"
 _ = require "underscore"
+_.string = require "underscore.string"
 
 class Application
 
@@ -10,6 +11,10 @@ class Application
     }
 
     @configs = new Vakoo.Configurator @env
+
+    @package = require Vakoo.Static.resolveFromCwd "package.json"
+
+    @name = Vakoo.Utils.fileSlugify @package.name + " " + @env
 
   initialize: (callback)=>
 

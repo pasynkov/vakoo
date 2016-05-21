@@ -1,6 +1,9 @@
 async = require "async"
 _ = require "underscore"
 
+MYSQL = "mysql"
+MONGO = "mongo"
+
 class Storage
 
   constructor: (@config)->
@@ -16,6 +19,7 @@ class Storage
         async.apply async.parallel, [
           @initializeMysql
           @initializeMongo
+          @initializeRedis
         ]
       ]
       callback
@@ -26,25 +30,60 @@ class Storage
     @createConnections(
       @parseConfig(@config.mongo)
       Vakoo.Mongo
-      (err, connections)=>
-        return callback err if err
-
-        return callback err unless connections
-
-        extender = {}
-
-        for conn in connections
-          extender[conn.name] = conn
-          if conn.isMain()
-            extender[conn.name] = conn
-            @mongo = conn
-            _app.mongo = conn
-
-        _.extend @mongo, extender
-        _.extend _app.mongo, extender
-
-        callback()
+      @extendConnections callback
     )
+
+  initializeMysql: (callback)=>
+    @createConnections(
+      @parseConfig(@config.mysql)
+      Vakoo.Mysql
+      @extendConnections callback
+    )
+
+  initializeRedis: (callback)=>
+
+    @createConnections(
+      @parseConfig(@config.redis)
+      Vakoo.Redis
+      @extendConnections callback
+    )
+
+
+  extendConnections: (callback)=>
+
+    (err, connections)=>
+      return callback err if err
+      return callback err unless connections
+
+      additionalConns = []
+
+      for conn in connections
+        if conn.isMain()
+          if conn instanceof Vakoo.Mysql
+            @mysql = conn
+          else if conn instanceof Vakoo.Mongo
+            @mongo = conn
+          else if conn instanceof Vakoo.Redis
+            @redis = conn
+        else
+          additionalConns.push conn
+
+      for conn in additionalConns
+
+        if conn instanceof Vakoo.Mysql
+          @mysql[conn.name] = conn
+        else if conn instanceof Vakoo.Mongo
+          @mongo[conn.name] = conn
+        else if conn instanceof Vakoo.Redis
+          @redis[conn.name] = conn
+
+      _app.mysql = @mysql
+      _app.mongo = @mongo
+      _app.redis = @redis
+
+
+      callback()
+
 
   parseConfig: (rawConfig)->
 
@@ -80,51 +119,5 @@ class Storage
     )
 
 
-  initializeMysql: (callback)=>
-    if (mysqlConfig = @validateConfig(@config.mysql, "mysql"))
-
-      mainConnectionName = _.first _.keys mysqlConfig
-
-      async.eachOf(
-        mysqlConfig
-        (config, connectionName, done)=>
-
-          @[connectionName] = new Vakoo.Mysql config, connectionName
-
-          if connectionName is mainConnectionName
-            @main = @[connectionName]
-            _app.mysql ?= {}
-            _app.mysql = @main
-
-
-          @[connectionName].connect done
-
-        callback
-      )
-
-    else callback()
-
-  validateConfig: (config, type)=>
-
-    #todo validate logic
-    if type is "mysql"
-
-      if _.intersection(_.keys(config), ["host", "username", "password"]).length
-
-        {main: config}
-
-      else if _.isObject(config)
-
-        if (mainConfig = @validateConfig(_.pick config, _.first(_.keys(config))))
-
-          console.log "ADD MULTI CONFIG"
-
-          return "aza"
-
-        else false
-
-      else false
-
-    else false
 
 module.exports = Storage
