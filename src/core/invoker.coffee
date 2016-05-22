@@ -46,7 +46,60 @@ class Invoker
       .option "-e, --env [env]", "environment"
       .action @start
 
+    program
+      .command "run"
+      .alias "r"
+      .usage("<path>")
+      .description "run application script"
+      .arguments "<path>"
+      .option "-e, --env [env]", "environment"
+      .action @run
+
     program.parse process.argv
+
+  run: (path, {env})=>
+
+    async.waterfall(
+      [
+        if _.isEmpty(env) then @getAllEnvs else async.apply @getEnvByNames, env
+        (envs, taskCallback)->
+
+          if _.isEmpty(envs)
+            taskCallback "Not found environment: `#{env}`"
+          else
+            taskCallback null, _.first(envs)
+        (env, taskCallback)->
+
+          taskCallback null, new Vakoo.Application(env)
+
+        (_app, taskCallback)->
+
+          window = {}
+          window._app = _app
+          global._app = _app
+
+          _app.initializeConfigsAndStorage taskCallback
+
+        (taskCallback)=>
+
+          scriptPath = Vakoo.Static.resolveFromCwd Vakoo.c.PATH_SCRIPTS + Vakoo.c.PATH_SEPARATOR + path
+
+          if path.split(Vakoo.c.PATH_SEPARATOR).length > 1
+            scriptPath = Vakoo.Static.resolveFromCwd path
+
+          try
+            Script = require scriptPath
+          catch e
+            return taskCallback e.toString()
+
+          new Script().invoke taskCallback
+
+      ]
+      (err)=>
+        if err
+          @logger.error err
+        process.exit()
+    )
 
   start: ({env})=>
 

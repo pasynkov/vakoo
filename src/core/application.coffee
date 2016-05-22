@@ -21,34 +21,32 @@ class Application
 
     @logger.info "Initialize"
 
-    async.auto(
-      {
-        config: @configs.initialize
-        storage: [
-          "config"
-          @initializeStorage
-        ]
-        initializers: [
-          "storage"
+    async.waterfall(
+      [
+        @initializeConfigsAndStorage
+        async.apply async.parallel, [
           @invokeInitializers
-        ]
-        timers: [
-          "initializers"
           @startTimers
         ]
-        web: [
-          "timers"
-          @initializeWeb
-        ]
-        end: [
-          "web"
-          Vakoo.Utils.asyncLog @logger.info, "Initialized successfully"
-        ]
-      }
+        Vakoo.Utils.asyncSkip
+        @initializeWeb
+        Vakoo.Utils.asyncLog @logger.info, "Initialized successfully"
+      ]
       callback
     )
 
-  initializeWeb: (..., callback)=>
+  initializeConfigsAndStorage: (callback)=>
+
+    async.waterfall(
+      [
+        @configs.initialize
+        @initializeStorage
+      ]
+      callback
+    )
+
+
+  initializeWeb: (callback)=>
 
     if not _.isEmpty(@configs.web) and @configs.web.enable isnt false
       @web = new Vakoo.Web @configs.web
@@ -57,7 +55,7 @@ class Application
 
     else callback()
 
-  initializeStorage: (..., callback)=>
+  initializeStorage: (callback)=>
 
     if not _.isEmpty(@configs.storage) and @configs.storage.enable isnt false
       @storage = new Vakoo.Storage @configs.storage
@@ -66,7 +64,7 @@ class Application
 
     else callback()
 
-  invokeInitializers: (..., callback)=>
+  invokeInitializers: (callback)=>
 
     if not _.isEmpty @configs.initializers
 
@@ -90,7 +88,7 @@ class Application
     else callback()
 
 
-  startTimers: (..., callback)=>
+  startTimers: (callback)=>
 
     @timers = {}
 
