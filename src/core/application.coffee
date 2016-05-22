@@ -2,6 +2,7 @@ async = require "async"
 _ = require "underscore"
 _.string = require "underscore.string"
 
+
 class Application
 
   constructor: (@env)->
@@ -27,9 +28,16 @@ class Application
           "config"
           @initializeStorage
         ]
-        web: [
-          "config"
+        initializers: [
           "storage"
+          @invokeInitializers
+        ]
+        timers: [
+          "initializers"
+          @startTimers
+        ]
+        web: [
+          "timers"
           @initializeWeb
         ]
         end: [
@@ -58,6 +66,52 @@ class Application
 
     else callback()
 
+  invokeInitializers: (..., callback)=>
+
+    if not _.isEmpty @configs.initializers
+
+      async.eachSeries(
+        @configs.initializers
+        (name, done)=>
+
+          try
+            Initializer = require Vakoo.c.PATH_INITIALIZERS + Vakoo.c.PATH_SEPARATOR + name
+          catch e
+            @logger.error "Initializer `#{name}` failed with err: `#{e.toString()}`"
+            return done()
+
+          initializer = new Initializer name
+
+          initializer._invoke done
+
+        callback
+      )
+
+    else callback()
+
+
+  startTimers: (..., callback)=>
+
+    @timers = {}
+
+    if not _.isEmpty @configs.timers
+
+      async.each(
+        @configs.timers
+        ({file, time}, done)=>
+
+          try
+            Timer = require Vakoo.c.PATH_TIMERS + Vakoo.c.PATH_SEPARATOR + file
+          catch e
+            @logger.error "Timer `#{file}` failed with err: `#{e.toString()}`"
+            return done()
+
+          @timers[file] = new Timer file, time
+
+        callback
+      )
+
+    else callback()
 
 
 module.exports = Application

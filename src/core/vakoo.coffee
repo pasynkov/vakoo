@@ -6,6 +6,8 @@ Creator = require "./creator"
 Constants = require "../constants"
 Application = require "./application"
 Configurator = require "../classes/configurator"
+Initializer = require "../extenders/initializer"
+Timer = require "../extenders/timer"
 
 Web = require "../classes/web/web"
 WebServer = require "../classes/web/server"
@@ -35,6 +37,8 @@ Vakoo =
   Mysql: Mysql
   Mongo: Mongo
   Redis: Redis
+  Initializer: Initializer
+  Timer: Timer
 
 Vakoo.c = new Constants Vakoo
 

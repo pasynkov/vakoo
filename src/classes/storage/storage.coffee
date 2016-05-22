@@ -14,40 +14,22 @@ class Storage
 
   initialize: (callback)=>
 
-    async.waterfall(
+    async.each(
       [
-        async.apply async.parallel, [
-          @initializeMysql
-          @initializeMongo
-          @initializeRedis
-        ]
+        [@config.mongo, Vakoo.Mongo]
+        [@config.mysql, Vakoo.Mysql]
+        [@config.redis, Vakoo.Redis]
       ]
+      ([config, StorageClass], done)=>
+
+        @createConnections(
+          @parseConfig config
+          StorageClass
+          @extendConnections done
+        )
+
       callback
     )
-
-  initializeMongo: (callback)=>
-
-    @createConnections(
-      @parseConfig(@config.mongo)
-      Vakoo.Mongo
-      @extendConnections callback
-    )
-
-  initializeMysql: (callback)=>
-    @createConnections(
-      @parseConfig(@config.mysql)
-      Vakoo.Mysql
-      @extendConnections callback
-    )
-
-  initializeRedis: (callback)=>
-
-    @createConnections(
-      @parseConfig(@config.redis)
-      Vakoo.Redis
-      @extendConnections callback
-    )
-
 
   extendConnections: (callback)=>
 

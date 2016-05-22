@@ -16,7 +16,7 @@
     "simple"
   ],
   "author": "Pasynkov Nikolay <a@pasa.me>",
-  "license": "GNU",
+  "license": "UNLICENSED",
   "bugs": {
     "url": "https://github.com/pasynkov/vakoo/issues"
   },
@@ -29,6 +29,7 @@
     "compression": "1.6.x",
     "connect-static": "1.5.x",
     "cookie-parser": "1.4.x",
+    "cron": "1.1.x",
     "express": "4.13.x",
     "handlebars": "4.0.x",
     "mongo-sql": "2.7.x",

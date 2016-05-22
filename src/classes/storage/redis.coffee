@@ -39,25 +39,25 @@ class Redis
 
     @client.on "connect", =>
 
-      @logger.info "`#{@name}` connected successfully"
+      @logger.info "Connected successfully"
 
       if @config.startupClean
         @logger.info "`#{@name}` start clean"
         @client.keys "#{_app.name}*", (err, keys)=>
           if err
-            @logger.error "`#{@name}` clean failed with err: `#{err}`"
+            @logger.error "Clean failed with err: `#{err}`"
             callback null, @
           else
 
             unless keys.length
-              @logger.info "`#{@name}` cleaner not found keys, completed"
-              return callback()
+              @logger.info "Cleaner not found keys, completed"
+              return callback null, @
 
             @client.del keys, (err)=>
               if err
-                @logger.error "`#{@name}` clean failed with err: `#{err}`"
+                @logger.error "Clean failed with err: `#{err}`"
               else
-                @logger.info "`#{@name}` cleaner successfully remove `#{keys.length}` keys, completed"
+                @logger.info "Cleaner successfully remove `#{keys.length}` keys, completed"
               callback null, @
 
       else
