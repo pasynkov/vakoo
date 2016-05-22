@@ -81,6 +81,10 @@ class Static
     ext = path.extname fileName
     path.basename fileName, ext
 
+  @isLocal: =>
 
+    vakooWorkingDirectory = path.resolve __dirname, "../.."
+
+    vakooWorkingDirectory is Static.resolveFromCwd("node_modules/vakoo")
 
 module.exports = Static

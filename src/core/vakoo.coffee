@@ -39,6 +39,12 @@ Vakoo =
   Redis: Redis
   Initializer: Initializer
   Timer: Timer
+  invoke: ->
+
+    window = global
+    window.Vakoo = Vakoo
+
+    new Invoker
 
 Vakoo.c = new Constants Vakoo
 

@@ -1,7 +1,10 @@
 Vakoo = require "./src/core/vakoo"
 
-window = {}
-window.Vakoo = Vakoo
-global.Vakoo = Vakoo
+if Vakoo.Static.isLocal()
+  Vakoo.invoke()
+else
+  try
+    require Vakoo.Static.resolveFromCwd "node_modules/vakoo/index"
+  catch
+    Vakoo.invoke()
 
-invoker = new Vakoo.Invoker
