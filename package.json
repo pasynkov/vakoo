@@ -35,7 +35,7 @@
     "mongo-sql": "2.7.x",
     "mongodb": "2.1.x",
     "mysql": "2.10.x",
-    "redis": "2.6.x",
+    "redis": "^2.6.0",
     "underscore": "1.8.x",
     "underscore.string": "3.3.x",
     "winston": "2.2.x"
