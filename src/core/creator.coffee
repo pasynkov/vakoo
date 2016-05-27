@@ -16,7 +16,7 @@ TYPE_SCRIPT_SHORT = "s"
 
 class Creator
 
-  constructor: ({@env, @envs, @mysql, @mongo, @postgre, @path})->
+  constructor: ({@env, @envs, @mysql, @mongo, @postgre, @conn, @path})->
 
     @logger = new Vakoo.Logger {
       label: "Creator"
@@ -53,6 +53,8 @@ class Creator
 
   createMigration: (name, callback)=>
 
+    @conn ?= "main"
+
     if not @mysql and not @mongo and not @postgre
       return callback "Need type of migration. --mongo or --mysql or --postgre."
 
@@ -72,7 +74,7 @@ class Creator
       [
         async.apply Vakoo.Static.createFolderIfNotExists, Vakoo.c.PATH_MIGRATIONS
         async.apply Vakoo.Static.createFolderIfNotExists, migrationPath
-        async.apply @createModule, name, migrationPath, TYPE_MIGRATION, false
+        async.apply @createModule, name, migrationPath, TYPE_MIGRATION, false, {connectionName: @conn}
       ]
       callback
     )
@@ -87,7 +89,9 @@ class Creator
       callback
     )
 
-  createModule: (name, folder, type, addToConfig, callback)=>
+  createModule: ([name, folder, type, addToConfig, params], callback)=>
+
+    params ?= {}
 
     fileName = Vakoo.Utils.fileSlugify(name)
     newFilePath = folder + Vakoo.c.PATH_SEPARATOR + fileName + Vakoo.c.EXT_COFFEE
@@ -98,9 +102,9 @@ class Creator
         async.apply Vakoo.Static.getErrIfExists, newFilePath
         async.apply @getTemplate, type
         (template, taskCallback)->
-          taskCallback null, template {
+          taskCallback null, template _.defaults({
             name: _.string.classify(name).replace /[0-9]/g, ""
-          }
+          }, params)
         async.apply Vakoo.Static.setFileContent, newFilePath
         #todo remove addToConfig param
 #        if addToConfig then async.apply(@addToConfigs, type, fileName) else async.asyncify(->)

@@ -65,7 +65,7 @@ class Migrator
           .flatten()
           .filter ({connectionName, id})->
 
-            _.find _.pairs(needToUp), ([name, UpperMigration])-> +name.split("_")[0] < +id
+            _.find _.pairs(needToUp), ([name])-> +name.split("_")[0] >= +id
 
           .map ({connectionName, id, name})->
             filename = Vakoo.Utils.fileSlugify(id + "_" + name) + Vakoo.c.EXT_COFFEE
@@ -104,8 +104,11 @@ class Migrator
 
   invokeMigrationsAction: (action, migrations, database, callback)=>
 
-    async.eachOf(
-      migrations
+    if _.isEmpty migrations
+      return callback()
+
+    async.eachOfSeries(
+      _.chain(migrations).pairs().sortBy(([name, MigrationClass])-> -(+name.split("_")[0])).object().value()
       (MigrationClass, name, done)->
 
         MigrationClass::storage = database

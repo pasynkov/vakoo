@@ -1,12 +1,16 @@
 class {{name}}Migration extends Vakoo.Migration
 
-  constructor: ->
+  constructor: -> super
 
-    super
+  connectionName: "{{connectionName}}"
 
-  up: (callback)-> callback()
+  up: (callback)->
 
-  down: (callback)-> callback()
+    callback()
+
+  down: (callback)->
+
+    callback()
 
 
 module.exports = {{name}}Migration

@@ -8,6 +8,7 @@ TYPE_CREATE_TABLE = "create-table"
 TYPE_SELECT = "select"
 TYPE_INSERT = "insert"
 TYPE_DELETE = "delete"
+TYPE_DROP = "drop-table"
 
 class PostgreTable
 
@@ -50,6 +51,29 @@ class PostgreTable
 
     @remove query, callback
 
+  create: (definition, callback)=>
+
+    query = builder.sql {
+      type: TYPE_CREATE_TABLE
+      table: @name
+      ifNotExists: true
+      definition
+    }
+
+    @connection.execute query.toString(), (err)-> callback err
+
+  drop: ([cascade] ..., callback)=>
+
+    cascade ?= true
+
+    query = builder.sql {
+      type: TYPE_DROP
+      table: @name
+      ifExists: true
+      cascade
+    }
+
+    @connection.execute query.toString(), (err)-> callback err
 
 class Postgre
 
@@ -90,11 +114,7 @@ class Postgre
       @getAvailableConnections()
       (conn, done)=>
 
-        query = builder.sql {
-          type: TYPE_CREATE_TABLE
-          table: Vakoo.c.STORAGE_MIGRATIONS_COLLECTION
-          ifNotExists: true
-          definition:
+        conn.collection(Vakoo.c.STORAGE_MIGRATIONS_COLLECTION).create {
             id:
               type: "int"
               notNull: true
@@ -103,9 +123,7 @@ class Postgre
             name:
               type: "text"
               notNull: true
-        }
-
-        conn.execute query.toString(), (err)-> done err
+          }, done
 
       callback
     )
