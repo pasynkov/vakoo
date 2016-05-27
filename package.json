@@ -35,7 +35,7 @@
     "mongo-sql": "2.7.x",
     "mongodb": "2.1.x",
     "mysql": "2.10.x",
-    "pg": "^4.5.5",
+    "pg": "4.5.x",
     "redis": "^2.6.0-2",
     "underscore": "1.8.x",
     "underscore.string": "3.3.x",
