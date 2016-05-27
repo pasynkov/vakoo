@@ -16,7 +16,7 @@ TYPE_SCRIPT_SHORT = "s"
 
 class Creator
 
-  constructor: ({@env, @envs, @mysql, @mongo, @path})->
+  constructor: ({@env, @envs, @mysql, @mongo, @postgre, @path})->
 
     @logger = new Vakoo.Logger {
       label: "Creator"
@@ -53,12 +53,20 @@ class Creator
 
   createMigration: (name, callback)=>
 
-    if not @mysql and not @mongo
-      return callback "Need type of migration. --mongo or --mysql."
+    if not @mysql and not @mongo and not @postgre
+      return callback "Need type of migration. --mongo or --mysql or --postgre."
 
-    migrationPath = if @mysql then Vakoo.c.PATH_MIGRATIONS_MYSQL else Vakoo.c.PATH_MIGRATIONS_MONGO
 
-    name = _.now() + "_" + name
+    if @mysql
+      migrationPath = Vakoo.c.PATH_MIGRATIONS_MYSQL
+    else if @mongo
+      migrationPath = Vakoo.c.PATH_MIGRATIONS_MONGO
+    else if @postgre
+      migrationPath = Vakoo.c.PATH_MIGRATIONS_POSTGRE
+
+    time = Math.round(_.now() / 1000)
+
+    name = time + "_" + name
 
     async.waterfall(
       [

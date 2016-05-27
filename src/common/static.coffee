@@ -1,6 +1,7 @@
 fs = require "fs"
 path = require "path"
 Handlebars = require "handlebars"
+_ = require "underscore"
 
 class Static
 
@@ -75,6 +76,22 @@ class Static
   @getDirFiles: (dirPath, callback)->
 
     fs.readdir dirPath, callback
+
+  @requireDirFiles: (dirPath, callback)->
+
+    Static.getDirFiles dirPath, (err, files)->
+      return callback err if err
+
+      result = {}
+
+      for file in files
+        try
+          result[file] = require Static.resolveFromCwd(dirPath + Vakoo.c.PATH_SEPARATOR + file)
+        catch e
+          return callback e.toString()
+
+      callback null, result
+
 
   @getFileNameWithoutExt: (fileName)->
 

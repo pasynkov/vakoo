@@ -35,6 +35,7 @@ class Invoker
       .option "-p, --path [path]", "Path of file (for scripts only)"
       .option "--mysql", "MySQL-type migration (for migrations only)"
       .option "--mongo", "Mongo-type migration (for migrations only)"
+      .option "--postgre", "Postgre-type migration (for migrations only)"
       .option "-e, --env [items]", "List of environment names (Add module to that envs only)", ((val)-> val.split(",")), []
       .action @create
       .on "--help", Vakoo.Creator::getHelpText
@@ -55,7 +56,64 @@ class Invoker
       .option "-e, --env [env]", "environment"
       .action @run
 
+    program
+      .command "migrate"
+      .alias "m"
+      .usage("<type> <databases...> [options]")
+      .description "run migrate with setted databases (mysql, mongo, postgre)"
+      .arguments "<type> <databases...>"
+      .option "-e, --env [items]", "List of environment names", ((val)-> val.split(",")), []
+      .action @migrate
+
     program.parse process.argv
+
+  migrate: (type, databases, {env})=>
+
+    async.waterfall(
+      [
+        async.apply @getProcessingEnv, env
+        (env, taskCallback)=>
+          taskCallback null, new Vakoo.Application(env)
+
+        @globalizeApp
+
+        (taskCallback)->
+          _app.initializeConfigsAndStorage taskCallback
+
+        (taskCallback)->
+
+          migrator = new Vakoo.Migrator type, databases
+
+          migrator.invoke taskCallback
+
+      ]
+      (err)=>
+        if err
+          @logger.error err
+        process.exit()
+    )
+
+  globalizeApp: (_app, callback)=>
+
+    window = {}
+    window._app = _app
+    global._app = _app
+
+    callback()
+
+  getProcessingEnv: (env, callback)=>
+
+    async.waterfall(
+      [
+        if _.isEmpty(env) then @getAllEnvs else async.apply @getEnvByNames, env
+        (envs, taskCallback)->
+          if _.isEmpty(envs)
+            taskCallback "Not found environment: `#{env}`"
+          else
+            taskCallback null, _.first(envs)
+      ]
+      callback
+    )
 
   run: (path, {env})=>
 
@@ -130,7 +188,7 @@ class Invoker
           process.exit()
     )
 
-  create: (type, names, {env, mysql, mongo, path})=>
+  create: (type, names, {env, mysql, mongo, postgre, path})=>
 
     async.waterfall(
       [
@@ -140,7 +198,7 @@ class Invoker
             taskCallback "Not found environment(s): `#{env}`"
           else
 
-            creator = new Vakoo.Creator {envs, mysql, mongo, path}
+            creator = new Vakoo.Creator {envs, mysql, mongo, postgre, path}
 
             async.each(
               names

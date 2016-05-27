@@ -3,6 +3,10 @@ _ = require "underscore"
 constants = {
   ENV_DEFAULT: "default"
 
+  STORAGE_POSTGRE: "postgre"
+
+  STORAGE_MIGRATIONS_COLLECTION: "_migrations"
+
   FOLDER_CONFIGS: "configs"
   FOLDER_CONTROLLERS: "controllers"
   FOLDER_INITIALIZERS: "initializers"
@@ -11,6 +15,7 @@ constants = {
   FOLDER_MIGRATIONS: "migrations"
   FOLDER_MIGRATIONS_MYSQL: "mysql"
   FOLDER_MIGRATIONS_MONGO: "mongo"
+  FOLDER_MIGRATIONS_POSTGRE: "postgre"
 
   FILE_PACKAGE_JSON: "package.json"
 
@@ -45,6 +50,7 @@ class Constants
       PATH_MIGRATIONS: Vakoo.Static.resolveFromCwd constants.FOLDER_MIGRATIONS
       PATH_MIGRATIONS_MYSQL: Vakoo.Static.resolveFromCwd constants.FOLDER_MIGRATIONS + constants.PATH_SEPARATOR + constants.FOLDER_MIGRATIONS_MYSQL
       PATH_MIGRATIONS_MONGO: Vakoo.Static.resolveFromCwd constants.FOLDER_MIGRATIONS + constants.PATH_SEPARATOR + constants.FOLDER_MIGRATIONS_MONGO
+      PATH_MIGRATIONS_POSTGRE: Vakoo.Static.resolveFromCwd constants.FOLDER_MIGRATIONS + constants.PATH_SEPARATOR + constants.FOLDER_MIGRATIONS_POSTGRE
     }
 
 module.exports = Constants

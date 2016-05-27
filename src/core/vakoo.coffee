@@ -18,6 +18,8 @@ Mysql = require "../classes/storage/mysql"
 Mongo = require "../classes/storage/mongo"
 Redis = require "../classes/storage/redis"
 Postgre = require "../classes/storage/postgre"
+Migration = require "../extenders/migration"
+Migrator = require "../core/migrator"
 
 Controller = require "../extenders/controller"
 
@@ -39,6 +41,8 @@ Vakoo =
   Mongo: Mongo
   Redis: Redis
   Postgre: Postgre
+  Migration: Migration
+  Migrator: Migrator
   Initializer: Initializer
   Timer: Timer
   invoke: ->
