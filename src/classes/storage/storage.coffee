@@ -19,6 +19,7 @@ class Storage
         [@config.mongo, Vakoo.Mongo]
         [@config.mysql, Vakoo.Mysql]
         [@config.redis, Vakoo.Redis]
+        [@config.postgre, Vakoo.Postgre]
       ]
       ([config, StorageClass], done)=>
 
@@ -47,6 +48,8 @@ class Storage
             @mongo = conn
           else if conn instanceof Vakoo.Redis
             @redis = conn
+          else if conn instanceof Vakoo.Postgre
+            @postgre = conn
         else
           additionalConns.push conn
 
@@ -58,10 +61,13 @@ class Storage
           @mongo[conn.name] = conn
         else if conn instanceof Vakoo.Redis
           @redis[conn.name] = conn
+        else if conn instanceof Vakoo.Postgre
+          @postgre[conn.name] = conn
 
       _app.mysql = @mysql
       _app.mongo = @mongo
       _app.redis = @redis
+      _app.postgre = @postgre
 
 
       callback()
