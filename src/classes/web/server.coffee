@@ -3,6 +3,7 @@ BodyParser = require "body-parser"
 CookieParser = require "cookie-parser"
 Compression = require "compression"
 createStatic = require "connect-static"
+basicAuth = require "basicauth-middleware"
 
 async = require "async"
 _ = require "underscore"
@@ -25,6 +26,13 @@ class WebServer
       extended: true
     )
     @addMiddleware CookieParser()
+
+    if @config.auth
+      @addMiddleware basicAuth(
+        @config.auth.username
+        @config.auth.password
+        @config.auth.message
+      )
 
     @_currentRoutes = []
 

@@ -117,6 +117,8 @@ class Invoker
 
   run: (path, {env})=>
 
+    @logger.info "Get and invoke script `#{path}`"
+
     async.waterfall(
       [
         if _.isEmpty(env) then @getAllEnvs else async.apply @getEnvByNames, env
@@ -151,11 +153,12 @@ class Invoker
             return taskCallback e.toString()
 
           new Script().invoke taskCallback
-
       ]
       (err)=>
         if err
-          @logger.error err
+          @logger.error "Script `#{path}` failed with err: `#{err}`"
+        else
+          @logger.info "Script `#{path}` successfully completed"
         process.exit()
     )
 

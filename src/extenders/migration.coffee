@@ -39,13 +39,13 @@ class Migration
 
   migrateDown: (callback)=>
 
-    @type = "up"
+    @type = "down"
 
     startTime = new Date()
 
     @logger.info "Invoke migrate down at #{startTime}"
 
-    @up (err)=>
+    @down (err)=>
 
       endTime = new Date()
 
@@ -60,6 +60,8 @@ class Migration
 
 
   up: (callback)-> callback()
+
+  down: (callback)-> callback()
 
 
 module.exports = Migration

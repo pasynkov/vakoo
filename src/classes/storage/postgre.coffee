@@ -9,23 +9,61 @@ TYPE_SELECT = "select"
 TYPE_INSERT = "insert"
 TYPE_DELETE = "delete"
 TYPE_DROP = "drop-table"
+TYPE_ALTER = "alter-table"
+TYPE_UPDATE = "update"
 
 class PostgreTable
 
   constructor: (@connection, @name)->
 
-  find: ([query] ..., callback)=>
+  find: ([query, columns, joins, groupBy, order] ..., callback)=>
+
+    order ?= "id desc"
 
     options =
       type: TYPE_SELECT
       table: @name
       where: query
+      columns: columns
+      joins: joins
+      order: order
 
-    sql = builder.sql(options).toString()
+    if groupBy
+      options.groupBy = groupBy
 
-    @connection.execute sql, callback
+    query = builder.sql(options)
+
+    @connection.execute query.toString(), query.values, callback
+
+  findOne: ([query] ..., callback)=>
+
+    @find query, (err, rows)->
+      return callback err if err
+
+      callback null, rows[0]
 
   insert: ([object, params]..., callback)=>
+
+    if _.isNull(object.id)
+      object = _.omit(object, "id")
+
+    options =
+      type: TYPE_INSERT
+      table: @name
+      values: object
+      returning: ["id"]
+
+    query = builder.sql(options)
+
+    @connection.execute query.toString(), query.values, (err, rows)->
+      return callback err if err
+
+      callback null, _.defaults(rows[0], object)
+
+  upsert: (object, conflict, callback)=>
+
+    if _.isNull(object.id)
+      object = _.omit(object, "id")
 
     options =
       type: TYPE_INSERT
@@ -33,8 +71,28 @@ class PostgreTable
       values: object
 
     query = builder.sql(options)
+    queryString = query.toString()
 
-    @connection.execute query.toString(), query.values, callback
+    for conflictKey, vals of conflict
+      upsertStr = " ON CONFLICT (#{conflictKey}) DO UPDATE SET "
+      upserts = []
+      vals.target ?= []
+      vals.excluded ?= []
+      for key in vals.target
+        upserts.push "#{key} = TARGET.#{key}"
+      for key in vals.excluded
+        upserts.push "#{key} = EXCLUDED.#{key}"
+      queryString += upsertStr + upserts.join(", ") + " RETURNING id"
+
+#
+#    for key in conflict.target
+#      upserts.push " ON CONFLICT (#{key}) DO UPDATE SET #{key} = TARGET.#{key}"
+#
+#    for key in conflict.excluded
+#      upserts.push " ON CONFLICT (#{key}) DO UPDATE SET #{key} = EXCLUDED.#{key}"
+
+    @connection.execute queryString, query.values, (err)->
+      callback err
 
   remove: (query, callback)=>
 
@@ -74,6 +132,31 @@ class PostgreTable
     }
 
     @connection.execute query.toString(), (err)-> callback err
+
+  alter: (action, callback)=>
+
+    query = builder.sql {
+      type: TYPE_ALTER
+      table: @name
+      action: action
+    }
+
+    @connection.execute query.toString(), (err)-> callback err
+
+  updateOne: (where, updates, callback)=>
+
+    query = builder.sql {
+      type: TYPE_UPDATE
+      table: @name
+      updates
+      where
+      returning: ["id"]
+    }
+
+    @connection.execute query.toString(), query.values, (err, rows)->
+      return callback err if err
+
+      callback null, _.defaults(rows[0], updates)
 
 class Postgre
 
@@ -180,10 +263,13 @@ class Postgre
 
   execute: ([query, values] ... , callback)=>
 
-    @client.query query, values, (err, result)->
-      return callback err if err
+    @client.query query, values, (err, result)=>
 
-      callback null, result.rows
+      if err
+        @logger.error "Execute query `#{query}` with values `#{values.join(", ")}` failed with err: `#{err}`"
+        return callback err
+
+      callback null, result?.rows
 
 
 

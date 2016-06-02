@@ -23,6 +23,7 @@
   "homepage": "https://github.com/pasynkov/vakoo",
   "dependencies": {
     "async": "^2.0.0-rc.4",
+    "basicauth-middleware": "1.1.x",
     "body-parser": "1.15.x",
     "coffee-script": "1.10.x",
     "commander": "2.9.x",

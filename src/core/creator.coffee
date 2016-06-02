@@ -89,7 +89,7 @@ class Creator
       callback
     )
 
-  createModule: ([name, folder, type, addToConfig, params], callback)=>
+  createModule: ([name, folder, type, addToConfig, params]..., callback)=>
 
     params ?= {}
 
