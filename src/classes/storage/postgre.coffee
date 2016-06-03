@@ -266,7 +266,7 @@ class Postgre
     @client.query query, values, (err, result)=>
 
       if err
-        @logger.error "Execute query `#{query}` with values `#{values.join(", ")}` failed with err: `#{err}`"
+        @logger.error "Execute query `#{query}` with values `#{values?.join(", ")}` failed with err: `#{err}`"
         return callback err
 
       callback null, result?.rows
