@@ -168,7 +168,6 @@ class Invoker
       [
         if _.isEmpty(env) then @getAllEnvs else async.apply @getEnvByNames, env
         (envs, taskCallback)->
-
           if _.isEmpty(envs)
             taskCallback "Not found environment: `#{env}`"
           else
@@ -226,6 +225,9 @@ class Invoker
     )
 
   getEnvByNames: (envs, callback)=>
+
+    unless _.isArray(envs)
+      envs = [envs]
 
     async.waterfall(
       [
