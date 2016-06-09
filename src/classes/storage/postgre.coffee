@@ -35,6 +35,20 @@ class PostgreTable
 
     @connection.execute query.toString(), query.values, callback
 
+  count: ([where]..., callback)=>
+
+    where ?= {}
+
+    @complicatedFindOne where, {
+      columns: [
+        type: "count"
+        as: "count"
+        expression: "id"
+      ]
+    }, (err, {count})->
+      callback err, +count
+
+
   complicatedInsert: (options = {}, callback)=>
 
     options.type = TYPE_INSERT
