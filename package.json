@@ -1,6 +1,6 @@
 {
   "name": "vakoo",
-  "version": "0.1.0-beta6",
+  "version": "0.1.0-beta7",
   "description": "NodeJS-based Micro-framework",
   "main": "index.js",
   "scripts": {
