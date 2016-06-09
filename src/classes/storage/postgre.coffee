@@ -35,9 +35,37 @@ class PostgreTable
 
     @connection.execute query.toString(), query.values, callback
 
+  complicatedInsert: (options = {}, callback)=>
+
+    options.type = TYPE_INSERT
+    options.table = @name
+
+    query = builder.sql(options)
+
+    @connection.execute query.toString(), query.values, callback
+
+  complicatedFind: (where = {}, options = {}, callback)=>
+
+    options.type = TYPE_SELECT
+    options.table = @name
+    options.where = where
+
+    query = builder.sql(options)
+
+    @connection.execute query.toString(), query.values, callback
+
+  complicatedFindOne: (query = {}, options = {}, callback)=>
+
+    options.limit = 1
+    options.offset = 0
+
+    @complicatedFind query, options, (err, rows)->
+      callback null, rows?[0]
+
   findOne: ([query] ..., callback)=>
 
-    @find query, (err, rows)->
+    @find query, ["*"], [], null, "", (err, rows)->
+
       return callback err if err
 
       callback null, rows[0]
@@ -59,6 +87,17 @@ class PostgreTable
       return callback err if err
 
       callback null, _.defaults(rows[0], object)
+
+  insertBatch: (values, callback)=>
+
+    options =
+      type: TYPE_INSERT
+      table: @name
+      values: values
+
+    query = builder.sql(options)
+
+    @connection.execute query.toString(), query.values, (err)-> callback err
 
   upsert: (object, conflict, callback)=>
 
@@ -94,7 +133,9 @@ class PostgreTable
     @connection.execute queryString, query.values, (err)->
       callback err
 
-  remove: (query, callback)=>
+  remove: ([query]...,callback)=>
+
+    query ?= {}
 
     options =
       type: TYPE_DELETE
@@ -105,7 +146,7 @@ class PostgreTable
 
     @connection.execute query.toString(), query.values, (err)-> callback err
 
-  delete: (query, callback)=>
+  delete: ([query]...,callback)=>
 
     @remove query, callback
 
@@ -157,6 +198,17 @@ class PostgreTable
       return callback err if err
 
       callback null, _.defaults(rows[0], updates)
+
+  update: (where, updates, callback)=>
+
+    query = builder.sql {
+      type: TYPE_UPDATE
+      table: @name
+      updates
+      where
+    }
+
+    @connection.execute query.toString(), query.values, (err)-> callback err
 
 class Postgre
 

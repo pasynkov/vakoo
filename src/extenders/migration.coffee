@@ -31,8 +31,8 @@ class Migration
       seconds = Math.round((endTime.getTime() - startTime.getTime()) / 1000)
 
       if err
-        @logger.error "Migration failed with err: `#{err}`"
-        callback()
+        @logger.error "Migration failed with err: `#{err}`, invoke migrateDown"
+        @migrateDown callback
       else
         @logger.info "Migration successfully completed at #{endTime}. Executing with `#{seconds}s`"
         @connection.appendToMigrationsTable @id, @name, callback
