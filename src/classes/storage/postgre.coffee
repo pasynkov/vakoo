@@ -239,6 +239,14 @@ class Postgre
       database: @_config.database
       port: @_config.port or 5432
 
+    @TYPE_CREATE_TABLE = TYPE_CREATE_TABLE
+    @TYPE_SELECT = TYPE_SELECT
+    @TYPE_INSERT = TYPE_INSERT
+    @TYPE_DELETE = TYPE_DELETE
+    @TYPE_DROP = TYPE_DROP
+    @TYPE_ALTER = TYPE_ALTER
+    @TYPE_UPDATE = TYPE_UPDATE
+
   isMain: => @_config.isMain is true
 
   #TODO autoreconnect
@@ -326,6 +334,14 @@ class Postgre
 
   collection: (name)=>
     @table name
+
+  createAndExecuteQuery: (options, callback)=>
+
+    query = @createQuery options
+
+    @execute query.toString(), query.values, callback
+
+  createQuery: (options)=> builder.sql options
 
   execute: ([query, values] ... , callback)=>
 

@@ -13,7 +13,7 @@ class WebContext
 
     @responser.header "Access-Control-Allow-Origin", origin
     @responser.header "Access-Control-Allow-Headers", "Content-Type"
-    @responser.header "Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS"
+    @responser.header "Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, PATCH, OPTIONS"
 
   sendResult: (err, data)=>
 
