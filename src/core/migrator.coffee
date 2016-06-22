@@ -4,7 +4,7 @@ async = require "async"
 
 class Migrator
 
-  constructor: (@type, @databases)->
+  constructor: (@type, @databases, @count = 1)->
 
     @logger = new Vakoo.Logger {
       label: "Migrator"
@@ -16,11 +16,58 @@ class Migrator
 
     async.each(
       @databases
-      @invokeMigrationForDatabase
+      if @type is "up" then @invokeUpMigrationForDatabase else @invokeDownMigrationForDatabase
       callback
     )
 
-  invokeMigrationForDatabase: (database, callback)=>
+  invokeDownMigrationForDatabase: (database, callback)=>
+
+    @logger.info "Invoke migration for `#{database}`"
+
+    if _.isEmpty(_app[database])
+      @logger.warn "`#{database}` isnt available for migration"
+      return callback()
+
+    switch database
+      when Vakoo.c.STORAGE_POSTGRE then migrationPath = Vakoo.c.PATH_MIGRATIONS_POSTGRE
+      else return callback()
+
+    async.waterfall [
+
+      _app[database].createMigrationCollectionIfNotExists
+
+      async.apply async.parallel, [
+        _app[database].getExistsMigrations
+        async.apply Vakoo.Static.requireDirFiles, migrationPath
+      ]
+
+      ([existsMigrations, migrationFiles], taskCallback)=>
+
+        needToDown = _.chain(existsMigrations)
+        .pairs()
+        .map ([connectionName, rows])->
+
+          _.map rows, ({id, name})-> {connectionName, id, name}
+
+        .flatten()
+        .first @count
+        .map ({connectionName, id, name})->
+          filename = Vakoo.Utils.fileSlugify(id + "_" + name) + Vakoo.c.EXT_COFFEE
+
+          if migrationFiles[filename] and migrationFiles[filename]::connectionName is connectionName
+            [filename,migrationFiles[filename]]
+          else false
+
+        .compact()
+        .object()
+        .value()
+
+        @invokeMigrateDown needToDown, database, callback
+
+    ], callback
+
+
+  invokeUpMigrationForDatabase: (database, callback)=>
 
     @logger.info "Invoke migration for `#{database}`"
 

@@ -63,11 +63,12 @@ class Invoker
       .description "run migrate with setted databases (mysql, mongo, postgre)"
       .arguments "<type> <databases...>"
       .option "-e, --env [items]", "List of environment names", ((val)-> val.split(",")), []
+      .option "-c, --count [count]", "Migrations count"
       .action @migrate
 
     program.parse process.argv
 
-  migrate: (type, databases, {env})=>
+  migrate: (type, databases, {env, count})=>
 
     async.waterfall(
       [
@@ -82,7 +83,7 @@ class Invoker
 
         (taskCallback)->
 
-          migrator = new Vakoo.Migrator type, databases
+          migrator = new Vakoo.Migrator type, databases, count
 
           migrator.invoke taskCallback
 

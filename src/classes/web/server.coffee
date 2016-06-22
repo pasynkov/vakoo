@@ -47,6 +47,9 @@ class WebServer
 
   addRoute: (method, route, controllerName, action = null)->
 
+    if method is "rest"
+      return @addRestRoutes route, controllerName, action
+
     if method is "*"
       method = "all"
 
@@ -55,6 +58,31 @@ class WebServer
     @express[method] route, (req, res)->
       context = new Vakoo.WebContext req, res, controllerName, action
       new _app.web.controllers[controllerName](context)[context.getAction()]()
+
+  addRestRoutes: (route, controllerName, action = null)->
+
+    if route[-1...] is "/"
+      route = route[0...-1]
+
+    for method in ["get", "post"]
+      do (method)=>
+        @_currentRoutes.push [method, route, controllerName, action]
+        @express[method] route, (req, res)->
+          subAction = if method is "get" then "list" else "create"
+          context = new Vakoo.WebContext req, res, controllerName, action, subAction
+          new _app.web.controllers[controllerName](context)[context.getAction()]()[context.getSubAction()]()
+
+    for method in ["get", "put", "delete", "patch"]
+      do (method)=>
+        @_currentRoutes.push [method, route + "/:id", controllerName, action]
+        @express[method] route + "/:id", (req, res)=>
+          context = new Vakoo.WebContext req, res, controllerName, action, method
+          controller = new _app.web.controllers[controllerName](context)
+          controllerAction = controller[context.getAction()]()
+          if _.isFunction(controllerAction[method])
+            controllerAction[method](context.request.params.id)
+          else
+            context.sendResult "Method `#{method}` of `#{controllerName}.#{action}` is not allowed"
 
   getPort: => process.env.NODE_PORT or @config.port
 
@@ -70,10 +98,19 @@ class WebServer
     async.waterfall(
       [
         @setupStatic
+        @pong
         @listen
       ]
       callback
     )
+
+  pong: (callback)=>
+
+    if @config.pong
+      @express.options "*", (req, res)->
+        new Vakoo.WebContext(req, res, "Unnamed", "pong").sendResult()
+      callback()
+    else callback()
 
   setupStatic: (callback)=>
 
