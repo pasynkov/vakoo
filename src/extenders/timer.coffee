@@ -10,13 +10,18 @@ class Timer
       label: "#{_.string.classify @name}Timer"
     }
 
-    @logger.info "Register with time `#{@time}`"
+    if @time
 
-    @job = new CronJob {
-      cronTime: @time
-      onTick: @_invoke
-      start: true
-    }
+      @logger.info "Register with time `#{@time}`"
+
+      @job = new CronJob {
+        cronTime: @time
+        onTick: @_invoke
+        start: true
+      }
+    else
+
+      @logger.warn "Skip registering timer without time"
 
   _invoke: =>
 
