@@ -27,7 +27,9 @@ Vakoo =
   package: require "../../package.json"
   Invoker: Invoker
   Logger: Logger
+  _Logger: Logger
   Utils: Utils
+  _Utils: Utils
   Static: Static
   Creator: Creator
   Application: Application
@@ -35,12 +37,15 @@ Vakoo =
   Web: Web
   WebServer: WebServer
   WebContext: WebContext
+  _WebContext: WebContext
   Controller: Controller
   Storage: Storage
   Mysql: Mysql
   Mongo: Mongo
   Redis: Redis
+  _Redis: Redis
   Postgre: Postgre
+  _Postgre: Postgre
   Migration: Migration
   Migrator: Migrator
   Initializer: Initializer

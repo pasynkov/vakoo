@@ -24,6 +24,8 @@ class WebContext
 
     @logger.info "Request: #{@requester.method}: #{@requester.url}. Run with `#{@controllerName}.#{@action}#{if @subAction then "." + @subAction else ""}`"
 
+  getPathToRewritable: -> _.last __filename.split "src/"
+
   getAction: -> @action or @request.params.action or @request.query.action
 
   getSubAction: -> @subAction or @request.method

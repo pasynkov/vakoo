@@ -247,6 +247,10 @@ class Postgre
     @TYPE_ALTER = TYPE_ALTER
     @TYPE_UPDATE = TYPE_UPDATE
 
+  @Collection: PostgreTable
+
+  getPathToRewritable: -> _.last __filename.split "src/"
+
   isMain: => @_config.isMain is true
 
   #TODO autoreconnect
@@ -330,7 +334,7 @@ class Postgre
     @collection(Vakoo.c.STORAGE_MIGRATIONS_COLLECTION).remove {id}, (err)-> callback err
 
   table: (name)=>
-    new PostgreTable @, name
+    new Postgre.Collection @, name
 
   collection: (name)=>
     @table name

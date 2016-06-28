@@ -26,6 +26,8 @@ class Redis
     @client =
       connected: false
 
+  getPathToRewritable: -> _.last __filename.split "src/"
+
   isMain: => @_config.isMain is true
 
   connect: (callback) =>

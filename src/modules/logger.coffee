@@ -1,4 +1,5 @@
 winston = require "winston"
+_ = require "underscore"
 
 class Logger extends winston.Logger
 
@@ -12,5 +13,7 @@ class Logger extends winston.Logger
         }
       ]
     }
+
+  getPathToRewritable: -> _.last __filename.split "src/"
 
 module.exports = Logger

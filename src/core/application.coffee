@@ -17,6 +17,8 @@ class Application
 
     @name = Vakoo.Utils.fileSlugify @package.name + " " + @env
 
+    Vakoo.Utils.rewriteCoreClasses @logger
+
   initialize: (callback)=>
 
     @logger.info "Initialize"
