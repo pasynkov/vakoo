@@ -8,6 +8,7 @@ Application = require "./application"
 Configurator = require "../classes/configurator"
 Initializer = require "../extenders/initializer"
 Timer = require "../extenders/timer"
+Queue = require "../extenders/queue"
 
 Web = require "../classes/web/web"
 WebServer = require "../classes/web/server"
@@ -20,6 +21,8 @@ Redis = require "../classes/storage/redis"
 Postgre = require "../classes/storage/postgre"
 Migration = require "../extenders/migration"
 Migrator = require "../core/migrator"
+
+Config = require "../extenders/config"
 
 Controller = require "../extenders/controller"
 
@@ -50,6 +53,10 @@ Vakoo =
   Migrator: Migrator
   Initializer: Initializer
   Timer: Timer
+  Queue: Queue
+  _Queue: Queue
+  Config: Config
+  _Config: Config
   invoke: ->
 
     window = global

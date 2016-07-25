@@ -1,7 +1,54 @@
 _ = require "underscore"
 _.string = require "underscore.string"
+async = require "async"
 redis = require "redis"
 
+class RedisList
+
+  constructor: (@name, @redis)->
+
+    @client = @redis.client
+
+  append: (value, callback)=>
+
+    @client.rpush @name, @redis.wrap(value), callback
+
+  prepend: (value, callback)=>
+
+    @client.lpush @name, @redis.wrap(value), callback
+
+  remove: ([value, count]..., callback)=>
+
+    count ?= 1
+
+    @client.lrem @name, count, @redis.wrap(value), callback
+
+  each: (handler, callback)=>
+
+    @client.lrange @name, 0, -1, (err, items)=>
+      return callback err if err
+
+      async.each(
+        items
+        (item, done)=>
+          handler @redis.unWrap(item), done
+        callback
+      )
+
+  length: (callback)=>
+
+    @client.llen @name, callback
+
+  eachPop: (handler, callback)=>
+
+    async.during(
+      @length()
+      (done)=>
+        @client.lpop (err, item)=>
+          return done err if err
+          handler @redis.unWrap(item), done
+      callback
+    )
 
 class Redis
 
@@ -25,6 +72,8 @@ class Redis
 
     @client =
       connected: false
+
+  @List: RedisList
 
   getPathToRewritable: -> _.last __filename.split "src/"
 
@@ -74,6 +123,16 @@ class Redis
 
     return @client.connected
 
+  list: (name)-> new Redis.List name, @
+
+  wrap: (value)->
+
+    JSON.stringify {
+      redisWrapper: value
+    }
+
+  unWrap: (value)-> JSON.parse(value).redisWrapper
+
 
   getex: (key, getter, ttl, callback)=>
     if @connected()
@@ -121,40 +180,45 @@ class Redis
     else
       getter callback
 
-  subscribe: (name, config, callback)=>
+  subscribe: (channel, Handler)=>
 
-    @subscribers[name] = {
-      config
-      redis: new Redis "#{name}Subscriber", @config
-      logger: vakoo.logger.addLogger "#{name}Subscriber"
-    }
+    subscriber = new Redis @_config, "#{@name}Subscriber::#{channel}"
 
-    @subscribers[name].redis.connect =>
+    subscriber.connect (err)=>
+      if err
+        return subscriber.logger.error "Subscribe fail with err: `#{err}`"
 
-      client = @subscribers[name].redis.client
+      @subscribers[channel] = subscriber
 
-      @subscribers[name].logger.info "Successfully connected"
+      client = subscriber.client
 
-      Script = require "#{process.cwd()}/subscribers/#{config.script}"
+      client.on "subscribe", (channel)=>
 
-      for channel in config.channels
-        client.subscribe channel
-        @subscribers[name].logger.info "Successfully subscribed to channel `#{channel}`"
+        subscriber.logger.info "Subscribed to channel `#{channel}`"
+
+      client.subscribe channel
 
       client.on "message", (channel, message)=>
 
-        @subscribers[name].logger.info "Incoming message from channel `#{channel}`"
+        message = @unWrap message
 
-        try
-          message = JSON.parse message
+        subscriber.logger.info "Incoming message on `#{channel}`"
+        subscriber.logger.info message
 
-        new Script channel, message, (err)=>
+        if _.isEmpty(Handler::)
+          invoke = Handler
+        else
+          invoke = new Handler(channel).invoke
+
+        invoke message, (err)=>
           if err
-            @subscribers[name].logger.error "Event failed with err: `#{err}`"
+            subscriber.logger.error "Handler for channel `#{channel}` failed with err: `#{err}`"
           else
-            @subscribers[name].logger.info "Event complete successfully"
+            subscriber.logger.info "Handler for channel `#{channel}` successfully completed"
 
-      callback()
+  publish: (channel, message)=>
+
+    @client.publish channel, @wrap(message)
 
 
 

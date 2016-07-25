@@ -45,6 +45,7 @@ class Invoker
       .alias "s"
       .description "start vakoo application with env (def. default)"
       .option "-e, --env [env]", "environment"
+      .option "-c, --context [context]", "context"
       .action @start
 
     program
@@ -54,6 +55,7 @@ class Invoker
       .description "run application script"
       .arguments "<path>"
       .option "-e, --env [env]", "environment"
+      .option "-c, --context [context]", "context"
       .action @run
 
     program
@@ -116,7 +118,7 @@ class Invoker
       callback
     )
 
-  run: (path, {env})=>
+  run: (path, {env, context})=>
 
     @logger.info "Get and invoke script `#{path}`"
 
@@ -131,7 +133,7 @@ class Invoker
             taskCallback null, _.first(envs)
         (env, taskCallback)->
 
-          taskCallback null, new Vakoo.Application(env)
+          taskCallback null, new Vakoo.Application(env, context)
 
         (_app, taskCallback)->
 
@@ -163,7 +165,7 @@ class Invoker
         process.exit()
     )
 
-  start: ({env})=>
+  start: ({env, context})=>
 
     async.waterfall(
       [
@@ -173,9 +175,8 @@ class Invoker
             taskCallback "Not found environment: `#{env}`"
           else
             taskCallback null, _.first(envs)
-        (env, taskCallback)->
 
-          taskCallback null, new Vakoo.Application(env)
+        async.asyncify (env)-> new Vakoo.Application(env, context)
 
         (_app, taskCallback)->
 
@@ -221,6 +222,15 @@ class Invoker
       [
         async.apply Vakoo.Static.getDirFiles, Vakoo.c.PATH_CONFIGS
         async.asyncify (files)-> _.map files, Vakoo.Static.getFileNameWithoutExt
+        async.asyncify (files)->
+
+          _.filter files, (file)->
+            try
+              Config = require Vakoo.c.PATH_CONFIGS + Vakoo.c.PATH_SEPARATOR + file
+              return if _.isFunction(Config::isEnv) then Config::isEnv() else false
+            catch
+              return false
+
       ]
       callback
     )

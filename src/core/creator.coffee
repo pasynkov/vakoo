@@ -13,6 +13,8 @@ TYPE_MIGRATION = "migration"
 TYPE_MIGRATION_SHORT = "m"
 TYPE_SCRIPT = "script"
 TYPE_SCRIPT_SHORT = "s"
+TYPE_QUEUE = "queue"
+TYPE_QUEUE_SHORT = "q"
 
 class Creator
 
@@ -36,12 +38,18 @@ class Creator
       @createMigration name, callback
     else if type in [TYPE_SCRIPT, TYPE_SCRIPT_SHORT]
       @createScript name, callback
+    else if type in [TYPE_QUEUE, TYPE_QUEUE_SHORT]
+      @createQueue name, callback
     else
       callback "Not available module type `#{type}`"
 
   createController: (name, callback)=>
 
     @createModule name, Vakoo.c.PATH_CONTROLLERS, TYPE_CONTROLLER, false, callback
+
+  createQueue: (name, callback)=>
+
+    @createModule name, Vakoo.c.PATH_QUEUES, TYPE_QUEUE, false, callback
 
   createInitializer: (name, callback)=>
 

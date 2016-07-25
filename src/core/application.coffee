@@ -5,13 +5,13 @@ _.string = require "underscore.string"
 
 class Application
 
-  constructor: (@env)->
+  constructor: (@env, @context)->
 
     @logger = new Vakoo.Logger {
       label: "Application"
     }
 
-    @configs = new Vakoo.Configurator @env
+    @configs = new Vakoo.Configurator @env, @context
 
     @package = require Vakoo.Static.resolveFromCwd "package.json"
 
@@ -28,7 +28,8 @@ class Application
         @initializeConfigsAndStorage
         async.apply async.parallel, [
           @invokeInitializers
-          @startTimers
+          @initializeTimers
+          @initializeQueues
         ]
         Vakoo.Utils.asyncSkip
         @initializeWeb
@@ -90,7 +91,7 @@ class Application
     else callback()
 
 
-  startTimers: (callback)=>
+  initializeTimers: (callback)=>
 
     @timers = {}
 
@@ -107,6 +108,29 @@ class Application
             return done()
 
           @timers[file] = new Timer file, time
+
+        callback
+      )
+
+    else callback()
+
+  initializeQueues: (callback)=>
+
+    @queues = {}
+
+    if not _.isEmpty @configs.queues
+
+      async.eachOf(
+        @configs.queues
+        (concurrency, file, done)=>
+
+          try
+            Queue = require Vakoo.c.PATH_QUEUES + Vakoo.c.PATH_SEPARATOR + file
+          catch e
+            @logger.error "Queue `#{file}` failed with err: `#{e.toString()}`"
+            return done()
+
+          @queues[file] = new Queue file, concurrency
 
         callback
       )

@@ -11,6 +11,7 @@ constants = {
   FOLDER_CONTROLLERS: "controllers"
   FOLDER_INITIALIZERS: "initializers"
   FOLDER_TIMERS: "timers"
+  FOLDER_QUEUES: "queues"
   FOLDER_SCRIPTS: "scripts"
   FOLDER_MIGRATIONS: "migrations"
   FOLDER_MIGRATIONS_MYSQL: "mysql"
@@ -46,6 +47,7 @@ class Constants
       PATH_CONTROLLERS: Vakoo.Static.resolveFromCwd constants.FOLDER_CONTROLLERS
       PATH_INITIALIZERS: Vakoo.Static.resolveFromCwd constants.FOLDER_INITIALIZERS
       PATH_TIMERS: Vakoo.Static.resolveFromCwd constants.FOLDER_TIMERS
+      PATH_QUEUES: Vakoo.Static.resolveFromCwd constants.FOLDER_QUEUES
       PATH_SCRIPTS: Vakoo.Static.resolveFromCwd constants.FOLDER_SCRIPTS
       PATH_MIGRATIONS: Vakoo.Static.resolveFromCwd constants.FOLDER_MIGRATIONS
       PATH_MIGRATIONS_MYSQL: Vakoo.Static.resolveFromCwd constants.FOLDER_MIGRATIONS + constants.PATH_SEPARATOR + constants.FOLDER_MIGRATIONS_MYSQL
