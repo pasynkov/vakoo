@@ -68,19 +68,23 @@ class Queue
 
   getRedisWaitingKey: (name = @name)=>
 
-    @getChannelId(name) + "_waiting_tasks"
+    Queue::getChannelId(name) + "_waiting_tasks"
 
   getRedisProcessingKey: (name = @name)=>
 
-    @getChannelId(name) + "_processing_tasks"
+    Queue::getChannelId(name) + "_processing_tasks"
 
   fill: ([name]..., task)=>
 
     name ?= @name
 
-    _app.redis.publish @getChannelId(name), task
+    _app.redis.publish Queue::getChannelId(name), task
 
   push: (task)=>
+
+    if @isAction task
+      @runAction task
+      return
 
     @logger.info "Push task `#{JSON.stringify task}`"
 
@@ -90,32 +94,70 @@ class Queue
       else
         @queue.push task
 
-  waitingLength: (callback)=>
+  isAction: (task)=>
 
-    _app.redis.list(@getRedisWaitingKey()).length callback
+    _.isObject(task) and task.action and task.action in [SLEEP_ACTION, PAUSE_ACTION, RESUME_ACTION]
 
-  processingLength: (callback)=>
+  runAction: ({action, arg})=>
 
-    _app.redis.list(@getRedisProcessingKey()).length callback
+    @logger.info "Run action `#{action}`"
 
-  pause: =>
-    @logger.info "Pause"
-    @queue.pause()
+    if action is SLEEP_ACTION
+      @sleep arg
+    else if action is PAUSE_ACTION
+      @pause()
+    else if action is RESUME_ACTION
+      @resume()
 
-  resume: =>
+  waitingLength: ([name]..., callback)=>
+
+    name ?= @name
+
+    _app.redis.list(Queue::getRedisWaitingKey(name)).length callback
+
+  processingLength: ([name]..., callback)=>
+
+    name ?= @name
+
+    _app.redis.list(Queue::getRedisProcessingKey(name)).length callback
+
+  pause: (name = false)=>
+
+    if name
+      return _app.redis.publish Queue::getChannelId(name), Queue::createAction(PAUSE_ACTION)
+
+    if @queue.paused
+      @logger.warn "Already paused"
+      false
+    else
+      @logger.info "Pause"
+      @queue.pause()
+      true
+
+  resume: (name = false)=>
+
+    if name
+      return _app.redis.publish Queue::getChannelId(name), Queue::createAction(RESUME_ACTION)
+
     @logger.info "Resume"
     @queue.resume()
 
-  sleep: (seconds)=>
+  sleep: ([name]..., seconds)=>
 
-    @logger.info "Sleep for `#{seconds}` seconds"
+    if name
 
-    @pause()
+      return _app.redis.publish Queue::getChannelId(name), Queue::createAction(SLEEP_ACTION, seconds)
 
-    setTimeout(
-      => @resume()
-      seconds * 1000
-    )
+
+    if @pause()
+      @logger.info "Sleep for `#{seconds}` seconds"
+
+      setTimeout(
+        @resume
+        seconds * 1000
+      )
+
+  createAction: (action, arg)-> {action, arg}
 
   _invoke: (task, callback)=>
 
