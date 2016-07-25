@@ -15,7 +15,7 @@ class Application
 
     @package = require Vakoo.Static.resolveFromCwd "package.json"
 
-    @name = Vakoo.Utils.fileSlugify @package.name + " " + @env
+    @name = Vakoo.Utils.fileSlugify @package.name + " " + @env + (if @context then (" " + @context) else "")
 
     Vakoo.Utils.rewriteCoreClasses @logger
 
