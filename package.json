@@ -34,6 +34,7 @@
     "connect-static": "1.5.x",
     "cookie-parser": "1.4.x",
     "cron": "1.1.x",
+    "elasticsearch": "11.0.x",
     "express": "4.13.x",
     "handlebars": "4.0.x",
     "mongo-sql": "2.7.x",

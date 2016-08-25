@@ -1,9 +1,6 @@
 async = require "async"
 _ = require "underscore"
 
-MYSQL = "mysql"
-MONGO = "mongo"
-
 class Storage
 
   constructor: (@config)->
@@ -20,6 +17,7 @@ class Storage
         [@config.mysql, Vakoo.Mysql]
         [@config.redis, Vakoo.Redis]
         [@config.postgre, Vakoo.Postgre]
+        [@config.elastic, Vakoo.Elastic]
       ]
       ([config, StorageClass], done)=>
 
@@ -50,6 +48,8 @@ class Storage
             @redis = conn
           else if conn instanceof Vakoo.Postgre
             @postgre = conn
+          else if conn instanceof Vakoo.Elastic
+            @elastic = conn
         else
           additionalConns.push conn
 
@@ -63,12 +63,14 @@ class Storage
           @redis[conn.name] = conn
         else if conn instanceof Vakoo.Postgre
           @postgre[conn.name] = conn
+        else if conn instanceof Vakoo.Elastic
+          @elastic[conn.name] = conn
 
       _app.mysql = @mysql
       _app.mongo = @mongo
       _app.redis = @redis
       _app.postgre = @postgre
-
+      _app.elastic = @elastic
 
       callback()
 
