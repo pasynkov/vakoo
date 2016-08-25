@@ -50,6 +50,92 @@ class RedisList
       callback
     )
 
+  get: (callback)=>
+
+    @client.lrange @name, 0, -1, (err, items)=>
+      return callback err if err
+
+      callback null, _.map(
+        items
+        @redis.unWrap
+      )
+
+  remove: ([value, count]..., callback)=>
+
+    count ?= 1
+
+    @client.lrem @name, count, @redis.wrap(value), callback
+
+  removeAll: (value, callback)=>
+
+    @remove value, 0, callback
+
+  removeOne: (value, callback)=>
+
+    @remove value, 1, callback
+
+class RedisCache
+
+  constructor: (@name, @ttl, @redis)->
+
+    @extractor = async.asyncify(-> null)
+
+    @logger = @redis.logger
+
+  extract: (@extractor = async.asyncify(->))=> @
+
+  get: (callback)=>
+
+    async.waterfall [
+      (taskCallback)=> @redis.client.get @name, taskCallback
+      async.asyncify @redis.unWrap
+      (value, taskCallback)=>
+        if value
+          taskCallback null, value
+        else
+          @invokeExtractor taskCallback
+    ], (err, value)=>
+      if err
+        @logger.error err
+        return @extractor callback
+      else callback null, value
+
+  invokeExtractor: (callback)=>
+
+    async.waterfall [
+      @extractor
+      @set
+      @get
+    ], callback
+
+  set: (value, callback)=>
+
+    method = "set"
+    args = [@name]
+
+    if @ttl
+      method = "setex"
+      args.push @ttl
+
+    args.push @redis.wrap(value)
+    args.push (err)-> callback err
+
+    @redis.client[method].apply @redis.client, args
+
+
+  refresh: (callback)=>
+
+    async.series [
+      @remove
+      @get
+    ], (err)-> callback err
+
+  remove: (callback)=>
+
+    @redis.client.del @name, (err)->
+      callback err
+
+
 class Redis
 
 
@@ -125,13 +211,19 @@ class Redis
 
   list: (name)-> new Redis.List name, @
 
+  cache: (name, ttl = false)=>
+    new RedisCache name, ttl, @
+
   wrap: (value)->
 
     JSON.stringify {
       redisWrapper: value
     }
 
-  unWrap: (value)-> JSON.parse(value).redisWrapper
+  unWrap: (value)->
+    unless value
+      return null
+    JSON.parse(value).redisWrapper
 
 
   getex: (key, getter, ttl, callback)=>
