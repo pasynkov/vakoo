@@ -30,6 +30,7 @@ class Application
           @invokeInitializers
           @initializeTimers
           @initializeQueues
+          @initializeBatches
         ]
         Vakoo.Utils.asyncSkip
         @initializeWeb
@@ -131,6 +132,29 @@ class Application
             return done()
 
           @queues[file] = new Queue file, concurrency
+
+        callback
+      )
+
+    else callback()
+
+  initializeBatches: (callback)=>
+
+    @batches = {}
+
+    if not _.isEmpty @configs.batches
+
+      async.eachOf(
+        @configs.batches
+        (config, file, done)=>
+
+          try
+            Batch = require Vakoo.c.PATH_BATCHES + Vakoo.c.PATH_SEPARATOR + file
+          catch e
+            @logger.error "Queue `#{file}` failed with err: `#{e.toString()}`"
+            return done()
+
+          @batches[file] = new Batch file, config
 
         callback
       )

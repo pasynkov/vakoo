@@ -15,6 +15,8 @@ TYPE_SCRIPT = "script"
 TYPE_SCRIPT_SHORT = "s"
 TYPE_QUEUE = "queue"
 TYPE_QUEUE_SHORT = "q"
+TYPE_BATCH = "batch"
+TYPE_BATCH_SHORT = "b"
 
 class Creator
 
@@ -40,6 +42,8 @@ class Creator
       @createScript name, callback
     else if type in [TYPE_QUEUE, TYPE_QUEUE_SHORT]
       @createQueue name, callback
+    else if type in [TYPE_BATCH, TYPE_BATCH_SHORT]
+      @createBatch name, callback
     else
       callback "Not available module type `#{type}`"
 
@@ -50,6 +54,10 @@ class Creator
   createQueue: (name, callback)=>
 
     @createModule name, Vakoo.c.PATH_QUEUES, TYPE_QUEUE, false, callback
+
+  createBatch: (name, callback)=>
+
+    @createModule name, Vakoo.c.PATH_BATCHES, TYPE_BATCH, false, callback
 
   createInitializer: (name, callback)=>
 
@@ -189,6 +197,8 @@ class Creator
     console.log "    migration (m)    create Migration"
     console.log "    env (e)          create Config"
     console.log "    script (s)       create Script"
+    console.log "    queue (q)        create Queue"
+    console.log "    batch (b)        create Batch"
     console.log()
     console.log()
 

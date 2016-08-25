@@ -9,6 +9,7 @@ Configurator = require "../classes/configurator"
 Initializer = require "../extenders/initializer"
 Timer = require "../extenders/timer"
 Queue = require "../extenders/queue"
+Batch = require "../extenders/batch"
 
 Web = require "../classes/web/web"
 WebServer = require "../classes/web/server"
@@ -58,6 +59,8 @@ Vakoo =
   Timer: Timer
   Queue: Queue
   _Queue: Queue
+  Batch: Batch
+  _Batch: Batch
   Config: Config
   _Config: Config
   invoke: ->
