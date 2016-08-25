@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepublish": "npm version prerelease",
     "postpublish": "git push",
-    "prerelease": "npm version prerelease && npm publish && git push"
+    "prerelease": "npm version prerelease && npm publish"
   },
   "repository": {
     "type": "git",
