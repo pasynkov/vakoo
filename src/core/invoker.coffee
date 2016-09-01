@@ -165,12 +165,13 @@ class Invoker
         process.exit()
     )
 
-  start: ({env, context})=>
+  start: ({env, context}, callback = ->)=>
 
     async.waterfall(
       [
         if _.isEmpty(env) then @getAllEnvs else async.apply @getEnvByNames, env
         (envs, taskCallback)->
+
           if _.isEmpty(envs)
             taskCallback "Not found environment: `#{env}`"
           else
@@ -190,6 +191,7 @@ class Invoker
         if err
           @logger.error err
           process.exit()
+        callback()
     )
 
   create: (type, names, {env, mysql, mongo, postgre, path})=>
@@ -223,7 +225,6 @@ class Invoker
         async.apply Vakoo.Static.getDirFiles, Vakoo.c.PATH_CONFIGS
         async.asyncify (files)-> _.map files, Vakoo.Static.getFileNameWithoutExt
         async.asyncify (files)->
-
           _.filter files, (file)->
             try
               Config = require Vakoo.c.PATH_CONFIGS + Vakoo.c.PATH_SEPARATOR + file

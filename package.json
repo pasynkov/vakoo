@@ -40,6 +40,7 @@
     "mongo-sql": "2.7.x",
     "mongodb": "2.1.x",
     "mysql": "2.10.x",
+    "node-uuid": "^1.4.7",
     "pg": "4.5.x",
     "redis": "^2.6.0-2",
     "underscore": "1.8.x",

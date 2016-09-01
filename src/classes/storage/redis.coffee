@@ -223,7 +223,13 @@ class Redis
   unWrap: (value)->
     unless value
       return null
-    JSON.parse(value).redisWrapper
+
+    result = null
+
+    try
+      result = JSON.parse(value).redisWrapper
+
+    result
 
 
   getex: (key, getter, ttl, callback)=>
