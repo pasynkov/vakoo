@@ -46,6 +46,7 @@ class Invoker
       .description "start vakoo application with env (def. default)"
       .option "-e, --env [env]", "environment"
       .option "-c, --context [context]", "context"
+      .option "--no-daemon [nd]", "REMOVE THIS OPTION!!!"
       .action @start
 
     program
