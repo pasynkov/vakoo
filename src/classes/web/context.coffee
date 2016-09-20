@@ -33,6 +33,7 @@ class WebContext
   allowOrigin: (origin = @request.headers.origin, methods = ["POST", "GET", "PUT", "DELETE", "PATCH", "OPTIONS"])->
 
     @responser.header "Access-Control-Allow-Origin", origin
+    @responser.header "Access-Control-Allow-Credentials", "true"
     @responser.header "Access-Control-Allow-Headers", "Content-Type"
     @responser.header "Access-Control-Allow-Methods", methods.join(", ")
 

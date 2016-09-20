@@ -102,11 +102,11 @@ class RedisCache
 
   invokeExtractor: (callback)=>
 
-    async.waterfall [
-      @extractor
-      @set
-      @get
-    ], callback
+    @extractor (err, value)=>
+      return callback err if err
+
+      @set value, (err)->
+        callback err, value
 
   set: (value, callback)=>
 
@@ -122,7 +122,6 @@ class RedisCache
 
     @redis.client[method].apply @redis.client, args
 
-
   refresh: (callback)=>
 
     async.series [
@@ -134,6 +133,85 @@ class RedisCache
 
     @redis.client.del @name, (err)->
       callback err
+
+class RedisDataset
+
+  constructor: (@name, @ttl, @redis)->
+
+  getRedisPrefix: =>
+
+    @_prefix ||= _app.package.name + "_" + _app.env + "_dataset_" + @name + "_"
+
+  getDataName: (time, id)=>
+
+    @getRedisPrefix() + @createDataMeta(time, id)
+
+  createDataMeta: (time = _.now(), id = uuid.v4())=>
+
+    [
+      time
+      id
+    ].join ":"
+
+  parseDataMeta: (key)=>
+
+    [emptyString, meta] = key.split @getRedisPrefix()
+
+    [time, id] = meta.split ":"
+
+    time = +time
+
+    {time, id}
+
+  add: (data, callback)=>
+
+    @redis.cache(
+      @getDataName()
+      @ttl
+    ).extract(
+      async.asyncify(-> data)
+    ).refresh callback
+
+  extractByMeta: (keys, callback)=>
+
+    async.series {
+      result: async.apply @getByMeta, keys
+      empty: async.apply @removeByMeta, keys
+    }, (err, {result})->
+      callback err, result
+
+  getByMeta: (keys, callback)=>
+
+    async.map(
+      keys
+      ({time, id}, done)=>
+        @redis.client.get @getDataName(time, id), (err, result)=>
+          return callback err if err
+
+          done null, @redis.unWrap(result)
+
+      callback
+    )
+
+  removeByMeta: (keys, callback)=>
+
+    async.each(
+      keys
+      ({time, id}, done)=>
+        @redis.client.del @getDataName(time, id), done
+      callback
+    )
+
+  getKeys: (callback)=>
+
+    @redis.getKeysByPrefix @getRedisPrefix(), callback
+
+  getDataMetaFromKeys: (callback)=>
+
+    @getKeys (err, keys)=>
+      return callback err if err
+
+      callback null, _.map(keys, @parseDataMeta)
 
 
 class Redis
@@ -210,6 +288,16 @@ class Redis
     return @client.connected
 
   list: (name)-> new Redis.List name, @
+
+  cache: (name, ttl = false)=>
+    new RedisCache name, ttl, @
+
+  dataset: (name, ttl = false)=>
+    new RedisDataset name, ttl, @
+
+  getKeysByPrefix: (prefix, callback)=>
+
+    @client.keys prefix + "*", callback
 
   cache: (name, ttl = false)=>
     new RedisCache name, ttl, @

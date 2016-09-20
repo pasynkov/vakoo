@@ -122,6 +122,11 @@ class Utils
       try
         Class = require pathToLocalClass
         return [className, Class]
+      catch e
+        if e.code is "MODULE_NOT_FOUND"
+          return null
+        else
+          throw new Error e
     .compact()
     .each ([className, Class])->
       logger.info "Rewrite by local class `#{className}`"

@@ -33,6 +33,7 @@ class Storage
   extendConnections: (callback)=>
 
     (err, connections)=>
+
       return callback err if err
       return callback err unless connections
 
@@ -92,7 +93,6 @@ class Storage
 
 
   createConnections: (config, Database, callback)=>
-
     return callback() unless config
 
     async.map(
